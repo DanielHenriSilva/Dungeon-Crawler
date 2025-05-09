@@ -59,6 +59,8 @@ void entrada (void)
     input = getch();
     printf("%c", input);
 
+    //blablabla
+
 
 
 }
