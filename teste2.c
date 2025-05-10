@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <conio.h>
+#include <windows.h>
 
 #define linha 10
 #define coluna 10
@@ -19,7 +20,6 @@ void mapa1 (char mapa[linha][coluna])
             {
                 mapa[i][j] = '#';
             }
-            
             else
             {
                 mapa[i][j] = '.';
@@ -37,61 +37,88 @@ void mapa1 (char mapa[linha][coluna])
 }
 
 
+void redesenharmapa1(char mapa[linha][coluna], int novopx, int novopy){
+
+    if (novopx >= 0 && novopx < linha && novopy >= 0 && novopy < coluna && mapa[novopx][novopy] != '#')
+    {
+
+        mapa[px][py] = '.';
+        COORD coord = {py * 2, px};
+        SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+        printf(". ");
+
+        px = novopx;
+        py = novopy;
+        mapa[px][py] = '&';
+
+        coord.X = py * 2;
+        coord.Y = px;
+        SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+        printf("& ");
+    
+    }
+
+}
+
 int main (void)
 {
     char mapa[linha][coluna];
-    int px = 1, py = 1;
     char input;
-    int i, j;
+    int i = 0, j;
 
     mapa1(mapa);
 
+    CONSOLE_CURSOR_INFO cursorInfo = {1, FALSE};
+    SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
+
+    system("cls");
+    while (i < linha)
+    {
+        j = 0;
+        while (j < coluna)
+        {
+            printf("%c ", mapa[i][j]);
+            j++;
+        }
+
+        printf("\n");
+        i++;            
+
+    }
+
     while (1)
     {
+        if (_kbhit())
+        {
+
+            input = _getch();
+
+            switch (input)
+            {
+            case 'd': case 'D':
+                redesenharmapa1(mapa, px, py+1);
             
-        system("cls");
+                break;
 
-        i  = 0;
-        while (i < linha)
-        {
-            j = 0;
-            while (j < coluna)
-            {
-                printf("%c ", mapa[i][j]);
-                j++;
-            }
+            case 'a': case 'A':
+                redesenharmapa1(mapa, px, py-1);
+            
+                break;
 
-            printf("\n");
-            i++;            
-
-        }
+            case 's': case 'S':
+                redesenharmapa1(mapa, px+1, py);
+            
+                break;
+            
+            case 'w': case 'W':
+                redesenharmapa1(mapa, px-1, py);
+            
+                break;
         
-        input = getch();
-
-        mapa[px][py] = '.';
-
-        switch (input)
-        {
-        case 'd': case 'D':
-            if (py < coluna - 2 && mapa[px][py+1] != '#')
-            {
-                py++;
-            }
-            break;
-
-        case 'a': case 'A':
-
-            if (py < linha + 2 && mapa[py][py-1] != '#')
-            {
-                py--;
-            }
-        
-        default:
-            break;
+            default:
+                break;
+            }   
         }
-
-        mapa[px][py] = '&';
-
     }
     
     return 0;

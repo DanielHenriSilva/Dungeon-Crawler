@@ -21,8 +21,6 @@ void menu (void)
     printf("%*s\n", 83, "DUNGEONS\n");
     printf("%*s\n", 80, "Of\n");
     printf("\033[0m");
-    printf("\033[1;31m");
-    
 
     i = 0;
     while (i < 2)
@@ -30,7 +28,8 @@ void menu (void)
         printf("\n");
         i++;
     }
-
+    
+    printf("\033[1;31m");
     printf("%*s\n", 119, "####  ####      ##  ######  ######   ########    ####      ##  ##      ##   ######");
     printf("%*s\n", 114, " ##   ## ##     ##  ##      ##       ##     ##   ## ##     ##  ##      ##  ##");
     printf("%*s\n", 114, " ##   ##  ##    ##  ##      ##       ##     ##   ##  ##    ##  ##      ##  ##");
@@ -55,6 +54,14 @@ void menu (void)
     printf("\033[0m");
     printf("\033[1;31m");
     
+}
+
+void entrada (void)
+{
+    char input;
+    input = getch();
+    printf("%c", input);
+
 }
 
 void mapa1 (char mapa[linha][coluna])
@@ -124,7 +131,7 @@ int main (void)
         switch (input)
         {
         case 'd': case 'D':
-            if (py < coluna - 2 && mapa[px][py+1] != '#')
+            if (py < linha - 1 && mapa[px][py+1] != '#')
             {
                 py++;
             }
@@ -132,10 +139,27 @@ int main (void)
 
         case 'a': case 'A':
 
-            if (py < linha + 2 && mapa[py][py-1] != '#')
+            if (py < linha + 1 && mapa[px][py-1] != '#')
             {
                 py--;
             }
+            break;
+
+        case 's': case 'S':
+
+            if (px < coluna + 1 && mapa[px+1][py] != '#')
+            {
+                px++;
+            }
+            break;
+            
+        case 'w': case 'W':
+
+            if (px < coluna - 1 && mapa[px-1][py] != '#')
+            {
+                px--;
+            }
+            break;
         
         default:
             break;

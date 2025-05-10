@@ -17,8 +17,6 @@ void menu (void)
     printf("%*s\n", 83, "DUNGEONS\n");
     printf("%*s\n", 80, "Of\n");
     printf("\033[0m");
-    printf("\033[1;31m");
-    
 
     i = 0;
     while (i < 2)
@@ -26,7 +24,8 @@ void menu (void)
         printf("\n");
         i++;
     }
-
+    
+    printf("\033[1;31m");
     printf("%*s\n", 119, "####  ####      ##  ######  ######   ########    ####      ##  ##      ##   ######");
     printf("%*s\n", 114, " ##   ## ##     ##  ##      ##       ##     ##   ## ##     ##  ##      ##  ##");
     printf("%*s\n", 114, " ##   ##  ##    ##  ##      ##       ##     ##   ##  ##    ##  ##      ##  ##");
@@ -58,12 +57,16 @@ void entrada (void)
     char input;
     input = getch();
     printf("%c", input);
+    
+    
+
+
 
 }
 
 int main(void)
 {
     menu();
-    getch();
+    entrada();
 
 }
