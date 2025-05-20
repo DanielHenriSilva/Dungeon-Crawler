@@ -29,15 +29,11 @@ int main (void){
 
     while (1)
     {
-        printf("%s%s\n", selecionar == 0 ? " \033[1;31m" : "", "Texto1");
-        printf("\033[0m");
+        printf("%*s%s\n", 70, selecionar == 0 ? "\033[1;31m" : "\033[0m", "Play");
 
-        printf("%s%s\n", selecionar == 1 ? " \033[1;31m" : "", "Texto2");  
-        printf("\033[0m");
+        printf("%*s%s\n", 70, selecionar == 1 ? "\033[1;31m" : "\033[0m", "Credit");  
         
-
-        printf("%s%s\n", selecionar == 2 ? " \033[1;31m" : "", "Texto3");
-        printf("\033[0m");
+        printf("%*s%s\n", 70, selecionar == 2 ? "\033[1;31m" : "\033[0m", "Exit");
 
         handleInput();
         system("cls");
