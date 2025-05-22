@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "d:/Jogo-Girotto",
-      "program": "d:/Jogo-Girotto/build/Debug/outDebug",
+      "cwd": "d:/Dungeon",
+      "program": "d:/Dungeon/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
