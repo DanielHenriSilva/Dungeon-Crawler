@@ -3,12 +3,12 @@
 #include <conio.h>
 #include <windows.h>
 
-#define linha 15
-#define coluna 15
+#define Vlinha 15
+#define Vcoluna 15
 int px = 1, py = 1, dialogo = 0, tutorial = 1;
 char input;
-char mapa[linha][coluna];
-char chao[linha][coluna];
+char mapa[Vlinha][Vcoluna];
+char chao[Vlinha][Vcoluna];
 int i, j;
 COORD coord = {0, 0};
 
@@ -20,7 +20,7 @@ int selecionar = 0; // 0=Play, 1=Help, 2=Exit
 
 void gotoxy(int x, int y)
 {
-    printf("\033[%d;%dH", y + 1, x + 1); // Código ANSI para posicionar cursor
+    printf("\033[%d;%dH", x + 1, y + 1); // Código ANSI para posicionar cursor
 }
 
 void desenharmenu(void)
@@ -61,17 +61,17 @@ void desenharmenu(void)
 void menu()
 {
     // Limpa apenas as áreas que serão atualizadas
-    printf("\033[20;1H\033[K"); // Limpa linha do Play
-    printf("\033[21;1H\033[K"); // Limpa linha do Credit
-    printf("\033[22;1H\033[K"); // Limpa linha do Exit
+    printf("\033[20;1H\033[K"); // Limpa Vlinha do Play
+    printf("\033[21;1H\033[K"); // Limpa Vlinha do Credit
+    printf("\033[22;1H\033[K"); // Limpa Vlinha do Exit
 
-    gotoxy(77, 20);
+    gotoxy(20, 77);
     printf("%sPlay\033[0m", selecionar == 0 ? "\033[1;31m" : "");
 
-    gotoxy(76, 21);
+    gotoxy(21, 76);
     printf("%sCredit\033[0m", selecionar == 1 ? "\033[1;31m" : "");
 
-    gotoxy(77, 22);
+    gotoxy(22, 77);
     printf("%sExit\033[0m", selecionar == 2 ? "\033[1;31m" : "");
 }
 
@@ -120,10 +120,10 @@ void entradamenu(void)
                 SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
 
                 i = 0;
-                while (i < linha)
+                while (i < Vlinha)
                 {
                     j = 0;
-                    while (j < coluna)
+                    while (j < Vcoluna)
                     {
                         printf("%c ", mapa[i][j]);
                         j++;
@@ -143,7 +143,7 @@ void entradamenu(void)
                         if(input == 101 || input == 27)
                         {
                             dialogo = 0;
-                            printf("\033[16;1H\033[K"); // Limpa linha da fala com o npc 
+                            printf("\033[16;1H\033[K"); // Limpa Vlinha da fala com o npc 
                             tutorial = 0;        
                         }
                     }
@@ -163,43 +163,52 @@ void entradamenu(void)
 
                 }
 
-                switch (input)
+               switch (input)
+        {
+            case 'd':
+            case 'D':
+                if (py < Vlinha - 1 && mapa[px][py + 1] != '*' && 
+                    mapa[px][py + 1] != 'P' && mapa[px][py + 1] != 'D' && 
+                    mapa[px][py + 1] != '@' && mapa[px][py + 1] != ' ') // Adicionado verificação do espaço vazio
                 {
-                    case 'd':
-                    case 'D':
-                        if (py < linha - 1 && mapa[px][py + 1] != '*' && mapa[px][py + 1] != 'P' && mapa[px][py + 1] != 'D' && mapa[px][py + 1] != '@') 
-                        {
-                            chao[px][py] = mapa[px][py];
-                            py++;
-                        }
-                        break;
+                    chao[px][py] = mapa[px][py];
+                    py++;
+                }
+                break;
 
-                    case 'a':
-                    case 'A':
-                        if (py > 0 && mapa[px][py - 1] != '*' && mapa[px][py - 1] != 'P' && mapa[px][py - 1] != 'D' && mapa[px][py - 1] != '@')
-                        {
-                            chao[px][py] = mapa[px][py];
-                            py--;
-                        }
-                        break;
+            case 'a':
+            case 'A':
+                if (py > 0 && mapa[px][py - 1] != '*' && 
+                    mapa[px][py - 1] != 'P' && mapa[px][py - 1] != 'D' && 
+                    mapa[px][py - 1] != '@' && mapa[px][py - 1] != ' ') // Adicionado verificação do espaço vazio
+                {
+                    chao[px][py] = mapa[px][py];
+                    py--;
+                }
+                break;
 
-                    case 's':
-                    case 'S':
-                        if (px < linha - 1 && mapa[px + 1][py] != '*' && mapa[px + 1][py] != 'P' && mapa[px + 1][py] != 'D' && mapa[px + 1][py] != '@')
-                        {
-                            chao[px][py] = mapa[px][py];
-                            px++;
-                        }
-                        break;
+            case 's':
+            case 'S':
+                if (px < Vlinha - 1 && mapa[px + 1][py] != '*' && 
+                    mapa[px + 1][py] != 'P' && mapa[px + 1][py] != 'D' && 
+                    mapa[px + 1][py] != '@' && mapa[px + 1][py] != ' ') // Adicionado verificação do espaço vazio
+                {
+                    chao[px][py] = mapa[px][py];
+                    px++;
+                }
+                break;
 
-                    case 'w':
-                    case 'W':
-                        if (px > 0 && mapa[px - 1][py] != '*' && mapa[px - 1][py] != 'P' && mapa[px - 1][py] != 'D' && mapa[px - 1][py] != '@')
-                        {
-                            chao[px][py] = mapa[px][py];
-                            px--;
-                        }
-                        break;
+            case 'w':
+            case 'W':
+                if (px > 0 && mapa[px - 1][py] != '*' && 
+                    mapa[px - 1][py] != 'P' && mapa[px - 1][py] != 'D' && 
+                    mapa[px - 1][py] != '@' && mapa[px - 1][py] != ' ') // Adicionado verificação do espaço vazio
+                {
+                    chao[px][py] = mapa[px][py];
+                    px--;
+                }
+                break;
+            // ... restante do código permanece igual
 
                     case 'e':
                     case 'E':
@@ -217,7 +226,7 @@ void entradamenu(void)
                                     if(input == 101 || input == 27)
                                     {
                                         dialogo = 0;
-                                        printf("\033[16;1H\033[K"); // Limpa linha da fala com o npc       
+                                        printf("\033[16;1H\033[K"); // Limpa Vlinha da fala com o npc       
                                         tutorial = 0;                           
                                     }
                                 }
@@ -245,7 +254,7 @@ void entradamenu(void)
             printf("Design Do Jogo Por:Daniel Silva\n");
             printf("Historia Do Jogo Por: Icaro Sousa\n");
             printf("\n\tAgradecimentos Especiais:\n");
-            printf("A todos que apoiaram e jogaram Dungeons of Inferno!");
+            printf("A todos que apoiaram e jogaram Dungeons of Infernus!");
             break;
 
         case 2:
@@ -263,24 +272,32 @@ void entrada(void)
     printf("%c", input);
 }
 
-void mapa1(char mapa[linha][coluna])
+void Vila(char mapa[Vlinha][Vcoluna])
 {
-
     int i = 0, j;
+    int centro_x = Vlinha / 2;
+    int centro_y = Vcoluna / 2;
+    int raio = 3; // Raio do círculo central
 
-    while (i < linha)
+    while (i < Vlinha)
     {
         j = 0;
-        while (j < coluna)
+        while (j < Vcoluna)
         {
-            if (i == 0 || i == linha - 1 || j == 0 || j == coluna - 1)
+            // Verifica se está na borda do quadrado
+            if (i == 0 || i == Vlinha - 1 || j == 0 || j == Vcoluna - 1)
             {
                 mapa[i][j] = '*';
             }
-
-            else 
+            // Verifica se está dentro do círculo (usando equação do círculo)
+            else if ((i - centro_x) * (i - centro_x) + (j - centro_y) * (j - centro_y) <= raio * raio)
             {
-                mapa[i][j] = '.';
+                mapa[i][j] = ' '; // Espaço vazio no círculo central
+                chao[i][j] = ' ';
+            }
+            else
+            {
+                mapa[i][j] = '.'; // Chão normal
                 chao[i][j] = '.';
             }
             j++;
@@ -288,28 +305,23 @@ void mapa1(char mapa[linha][coluna])
         i++;
     }
 
+    // Mantendo os elementos originais da vila
     mapa[px][py] = '&'; // Personagem
-    mapa[1][2] = 'P'; // NPC Tutorial
-    /*mapa[2][5] = 'P'; // NPC 
-    mapa[1][2] = 'P'; // NPC 
-    mapa[1][2] = 'P'; // NPC 
-    mapa[1][2] = 'P'; // NPC 
-    mapa[1][2] = 'P'; // NPC*/ 
-    mapa[12][7] = 'D'; // Porta Da Dungeon
-    mapa[11][6] = 'P'; // NPC Guarda Da Dungeon
-    mapa[13][6] = '*'; // Parede Da Dungeon
-    mapa[13][8] = '*'; // Parede Da Dungeon
-    mapa[12][6] = '*'; // Parede Da Dungeon
-    mapa[12][8] = '*'; // Parede Da Dungeon
+    mapa[1][2] = 'P';   // NPC Tutorial
+    mapa[12][7] = 'D';  // Porta Da Dungeon
+    mapa[12][5] = 'P';  // NPC Guarda Da Dungeon
+    mapa[13][6] = '*';  // Parede Da Dungeon
+    mapa[13][8] = '*';  // Parede Da Dungeon
+    mapa[12][6] = '*';  // Parede Da Dungeon
+    mapa[12][8] = '*';  // Parede Da Dungeon
     mapa[13][13] = '@'; // Chave Para Abrir a Porta
 }
-
 int main(void)
 {
     printf("\033[?25l");
     desenharmenu();
 
-    mapa1(mapa);
+    Vila(mapa);
 
     while (1)
     {
