@@ -277,7 +277,7 @@ void Vila(char mapa[Vlinha][Vcoluna])
     int i = 0, j;
     int centro_x = Vlinha / 2;
     int centro_y = Vcoluna / 2;
-    int raio = 3; // Raio do círculo central
+    int raio = 4; // Raio do círculo central
 
     while (i < Vlinha)
     {
@@ -309,11 +309,11 @@ void Vila(char mapa[Vlinha][Vcoluna])
     mapa[px][py] = '&'; // Personagem
     mapa[1][2] = 'P';   // NPC Tutorial
     mapa[12][7] = 'D';  // Porta Da Dungeon
-    mapa[12][5] = 'P';  // NPC Guarda Da Dungeon
-    mapa[13][6] = '*';  // Parede Da Dungeon
-    mapa[13][8] = '*';  // Parede Da Dungeon
-    mapa[12][6] = '*';  // Parede Da Dungeon
-    mapa[12][8] = '*';  // Parede Da Dungeon
+    mapa[12][9] = 'P';  // NPC Guarda Da Dungeon-
+    mapa[13][6] = '.';  // Parede Da Dungeon
+    mapa[13][8] = '.';  // Parede Da Dungeon
+    mapa[12][6] = '.';  // Parede Da Dungeon
+    mapa[12][8] = '.';  // Parede Da Dungeon
     mapa[13][13] = '@'; // Chave Para Abrir a Porta
 }
 int main(void)
