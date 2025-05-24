@@ -4,12 +4,14 @@
 #include <conio.h>
 #include <windows.h>
 
-#define linha 15
-#define coluna 15
-int px = 1, py = 1, dialogo = 0, tutorial = 1;
+#define Vlinha 15
+#define Vcoluna 15
+int px = 1, py = 1, dialogo = 0, tutorial = 1, Nfase = 0;
 char input;
-char mapa[linha][coluna];
-char chao[linha][coluna];
+char Vmapa[Vlinha][Vcoluna];
+char F1mapa[Vlinha][Vcoluna];
+char Vchao[Vlinha][Vcoluna];
+char F1chao[Vlinha][Vcoluna];
 int i, j;
 COORD coord = {0, 0};
 
@@ -21,7 +23,7 @@ int selecionar = 0; // 0=Play, 1=Help, 2=Exit
 
 void gotoxy(int x, int y)
 {
-    printf("\033[%d;%dH", y + 1, x + 1); // Código ANSI para posicionar cursor
+    printf("\033[%d;%dH", x + 1, y + 1);
 }
 
 void desenharmenu(void)
@@ -61,10 +63,9 @@ void desenharmenu(void)
 
 void menu()
 {
-    // Limpa apenas as áreas que serão atualizadas
-    printf("\033[20;1H\033[K"); // Limpa linha do Play
-    printf("\033[21;1H\033[K"); // Limpa linha do Credit
-    printf("\033[22;1H\033[K"); // Limpa linha do Exit
+    printf("\033[20;1H\033[K");
+    printf("\033[21;1H\033[K");
+    printf("\033[22;1H\033[K");
 
     gotoxy(20, 77);
     printf("%sPlay\033[0m", selecionar == 0 ? "\033[1;31m" : "");
@@ -211,8 +212,8 @@ ini:
                         if (input == 101 || input == 27)
                         {
                             dialogo = 0;
-                            printf("\033[16;1H\033[K"); // Limpa linha da fala com o npc 
-                            tutorial = 0;        
+                            printf("\033[16;1H\033[K");
+                            tutorial = 0;
                         }
                     }
                 }
@@ -246,41 +247,69 @@ ini:
 
                 switch (input)
                 {
-                    case 'd':
-                    case 'D':
-                        if (py < linha - 1 && mapa[px][py + 1] != '*' && mapa[px][py + 1] != 'P' && mapa[px][py + 1] != 'D' && mapa[px][py + 1] != '@') 
+                case 'd':
+                case 'D':
+                    if (py < Vcoluna - 1)
+                    {
+                        char* mapaAtual = (Nfase == 0) ? &Vmapa[px][py] : &F1mapa[px][py];
+                        char* chaoAtual = (Nfase == 0) ? &Vchao[px][py] : &F1chao[px][py];
+                        char proximo = (Nfase == 0) ? Vmapa[px][py + 1] : F1mapa[px][py + 1];
+                        
+                        if (proximo != '*' && proximo != '#' && proximo != 'P' && proximo != 'D' && proximo != '@' && proximo != ' ')
                         {
-                            chao[px][py] = mapa[px][py];
+                            *chaoAtual = *mapaAtual;
                             py++;
                         }
-                        break;
+                    }
+                    break;
 
-                    case 'a':
-                    case 'A':
-                        if (py > 0 && mapa[px][py - 1] != '*' && mapa[px][py - 1] != 'P' && mapa[px][py - 1] != 'D' && mapa[px][py - 1] != '@')
+                case 'a':
+                case 'A':
+                    if (py > 0)
+                    {
+                        char* mapaAtual = (Nfase == 0) ? &Vmapa[px][py] : &F1mapa[px][py];
+                        char* chaoAtual = (Nfase == 0) ? &Vchao[px][py] : &F1chao[px][py];
+                        char proximo = (Nfase == 0) ? Vmapa[px][py - 1] : F1mapa[px][py - 1];
+                        
+                        if (proximo != '*' && proximo != '#' && proximo != 'P' && proximo != 'D' && proximo != '@' && proximo != ' ')
                         {
-                            chao[px][py] = mapa[px][py];
+                            *chaoAtual = *mapaAtual;
                             py--;
                         }
-                        break;
+                    }
+                    break;
 
-                    case 's':
-                    case 'S':
-                        if (px < linha - 1 && mapa[px + 1][py] != '*' && mapa[px + 1][py] != 'P' && mapa[px + 1][py] != 'D' && mapa[px + 1][py] != '@')
+                case 's':
+                case 'S':
+                    if (px < Vlinha - 1)
+                    {
+                        char* mapaAtual = (Nfase == 0) ? &Vmapa[px][py] : &F1mapa[px][py];
+                        char* chaoAtual = (Nfase == 0) ? &Vchao[px][py] : &F1chao[px][py];
+                        char proximo = (Nfase == 0) ? Vmapa[px + 1][py] : F1mapa[px + 1][py];
+                        
+                        if (proximo != '*' && proximo != '#' && proximo != 'P' && proximo != 'D' && proximo != '@' && proximo != ' ')
                         {
-                            chao[px][py] = mapa[px][py];
+                            *chaoAtual = *mapaAtual;
                             px++;
                         }
-                        break;
+                    }
+                    break;
 
-                    case 'w':
-                    case 'W':
-                        if (px > 0 && mapa[px - 1][py] != '*' && mapa[px - 1][py] != 'P' && mapa[px - 1][py] != 'D' && mapa[px - 1][py] != '@')
+                case 'w':
+                case 'W':
+                    if (px > 0)
+                    {
+                        char* mapaAtual = (Nfase == 0) ? &Vmapa[px][py] : &F1mapa[px][py];
+                        char* chaoAtual = (Nfase == 0) ? &Vchao[px][py] : &F1chao[px][py];
+                        char proximo = (Nfase == 0) ? Vmapa[px - 1][py] : F1mapa[px - 1][py];
+                        
+                        if (proximo != '*' && proximo != '#' && proximo != 'P' && proximo != 'D' && proximo != '@' && proximo != ' ')
                         {
-                            chao[px][py] = mapa[px][py];
+                            *chaoAtual = *mapaAtual;
                             px--;
                         }
-                        break;
+                    }
+                    break;
 
                 case 'e':
                 case 'E':
@@ -291,23 +320,23 @@ ini:
                             dialogo = 1;
                             printf("Ola Aventureiro");
 
-                                while (dialogo == 1)
+                            while (dialogo == 1)
+                            {
+                                input = getch();
+                                if (input == 101 || input == 27)
                                 {
-                                    input = getch();
-                                    if(input == 101 || input == 27)
-                                    {
-                                        dialogo = 0;
-                                        printf("\033[16;1H\033[K"); // Limpa linha da fala com o npc       
-                                        tutorial = 0;                           
-                                    }
+                                    dialogo = 0;
+                                    printf("\033[16;1H\033[K");
+                                    tutorial = 0;
                                 }
                             }
                         }
-    
-                        if ((abs(px - 13) <= 1 && abs(py - 13) <= 1) && mapa[13][13] == '@')
-                        {
-                            mapa[13][13] = '.';
-                            chao[13][13] = '.';
+                    }
+
+                    if ((abs(px - 13) <= 1 && abs(py - 13) <= 1) && Nfase == 0 && Vmapa[13][13] == '@')
+                    {
+                        Vmapa[13][13] = '.';
+                        Vchao[13][13] = '.';
 
                         Vmapa[12][7] = '=';
                         Vchao[12][7] = '=';
@@ -341,59 +370,12 @@ ini:
     }
 }
 
-void entrada(void)
-{
-    input = getch();
-    printf("%c", input);
-}
-
-void mapa1(char mapa[linha][coluna])
-{
-
-    int i = 0, j;
-
-    while (i < linha)
-    {
-        j = 0;
-        while (j < coluna)
-        {
-            if (i == 0 || i == linha - 1 || j == 0 || j == coluna - 1)
-            {
-                mapa[i][j] = '*';
-            }
-
-            else 
-            {
-                mapa[i][j] = '.';
-                chao[i][j] = '.';
-            }
-            j++;
-        }
-        i++;
-    }
-
-    mapa[px][py] = '&'; // Personagem
-    mapa[1][2] = 'P'; // NPC Tutorial
-    /*mapa[2][5] = 'P'; // NPC 
-    mapa[1][2] = 'P'; // NPC 
-    mapa[1][2] = 'P'; // NPC 
-    mapa[1][2] = 'P'; // NPC 
-    mapa[1][2] = 'P'; // NPC*/ 
-    mapa[12][7] = 'D'; // Porta Da Dungeon
-    mapa[11][6] = 'P'; // NPC Guarda Da Dungeon
-    mapa[13][6] = '*'; // Parede Da Dungeon
-    mapa[13][8] = '*'; // Parede Da Dungeon
-    mapa[12][6] = '*'; // Parede Da Dungeon
-    mapa[12][8] = '*'; // Parede Da Dungeon
-    mapa[13][13] = '@'; // Chave Para Abrir a Porta
-}
-
 int main(void)
 {
     printf("\033[?25l");
     desenharmenu();
 
-    mapa1(mapa);
+    Vila(Vmapa);
 
     while (1)
     {
