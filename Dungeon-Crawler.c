@@ -1,25 +1,36 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <conio.h>
 #include <windows.h>
 
-#define Vlinha 15
-#define Vcoluna 15
-int px = 1, py = 1, dialogo = 0, tutorial = 1, Nfase = 0;
+#define MaximoDeLinhas 45
+#define MaximoDeColunas 45
+#define TFases 4
+
+char mapas[TFases][MaximoDeLinhas][MaximoDeColunas];
+char chaos[TFases][MaximoDeLinhas][MaximoDeColunas];
+
+int dimensoesfases[TFases][2] =
+    {
+        {15, 15}, // Fase 0: Vila
+        {15, 15}, // Fase 1: Dungeon 1
+        {25, 25}, // Fase 2: Dungeon 2
+        {45, 45}  // Fase 3: Dungeon 3
+};
+
+int pxinicial[TFases] = {1, 1, 1, 1}, pyinicial[TFases] = {1, 1, 1, 1};
+
+int px, py;
+int dialogo = 0, Nfase = 0, tutorial = 1;
+
 char input;
-char Vmapa[Vlinha][Vcoluna];
-char F1mapa[Vlinha][Vcoluna];
-char Vchao[Vlinha][Vcoluna];
-char F1chao[Vlinha][Vcoluna];
-int i, j;
 COORD coord = {0, 0};
 
 #define key_up 119
 #define key_down 115
 #define enter 13
 
-int selecionar = 0; // 0=Play, 1=Help, 2=Exit
+int selecionar = 0; // 0=Play, 1=Credit, 2=Exit
 
 void gotoxy(int x, int y)
 {
@@ -77,71 +88,116 @@ void menu()
     printf("%sExit\033[0m", selecionar == 2 ? "\033[1;31m" : "");
 }
 
-void fase1()
+void IniFase(int fase)
 {
-    i = 0;
-    while (i < Vlinha)
+    int linhas = dimensoesfases[fase][0];
+    int colunas = dimensoesfases[fase][1];
+
+    int li = 0, co = 0;
+    while (li < linhas)
     {
-        j = 0;
-        while (j < Vcoluna)
+        co = 0;
+        while (co < colunas)
         {
-            if (i == 0 || i == Vlinha - 1 || j == 0 || j == Vcoluna - 1)
+            if (li == 0 || li == linhas - 1 || co == 0 || co == colunas - 1)
             {
-                F1mapa[i][j] = '#';
-                F1chao[i][j] = '#';
+                mapas[fase][li][co] = '*';
+                chaos[fase][li][co] = mapas[fase][li][co];
+            }
+            else if (fase == 0)
+            {
+                int centroX = linhas / 2;
+                int centroY = colunas / 2;
+                int raio = 4;
+
+                if ((li - centroX) * (li - centroX) + (co - centroY) * (co - centroY) <= raio * raio)
+                {
+                    mapas[fase][li][co] = ' ';
+                    chaos[fase][li][co] = ' ';
+                }
+                else
+                {
+                    mapas[fase][li][co] = '.';
+                    chaos[fase][li][co] = '.';
+                }
             }
             else
             {
-                F1mapa[i][j] = '.';
-                F1chao[i][j] = '.';
+                mapas[fase][li][co] = '.';
+                chaos[fase][li][co] = '.';
             }
-            j++;
+            co++;
         }
-        i++;
+        li++;
     }
-    // Adiciona elementos específicos da fase 1
-    F1mapa[5][5] = 'P';
-    F1mapa[7][7] = 'D';
-    F1mapa[px][py] = '&'; // Posiciona o jogador
+
+    // Adiciona elementos específicos de casa fase
+    if (fase == 0) // Fase Da Vila
+    {
+        mapas[fase][1][2] = 'P';
+        mapas[fase][12][7] = 'D';
+        mapas[fase][13][13] = '@';
+    }
+    else if (fase == 1) // Dungeon 1
+    {
+        mapas[fase][5][5] = 'P';
+        mapas[fase][12][7] = 'D';
+        mapas[fase][13][13] = '@';
+    }
+    else if (fase == 2) // Dungeon 2
+    {
+        mapas[fase][12][7] = 'D';
+        mapas[fase][13][13] = '@';
+    }
+
+    // Adiconar os outros mapas
+
+    if (fase == Nfase)
+    {
+        mapas[fase][pxinicial[fase]][pyinicial[fase]] = '&';
+    }
 }
 
-void Vila(char Vmapa[Vlinha][Vcoluna])
+void RenderizarMapa()
 {
-    int i = 0, j;
-    int centro_x = Vlinha / 2;
-    int centro_y = Vcoluna / 2;
-    int raio = 4;
+    int linhas = dimensoesfases[Nfase][0];
+    int colunas = dimensoesfases[Nfase][1];
 
-    while (i < Vlinha)
+    COORD pos = {0, 0};
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
+
+    int i = 0, j = 0;
+    while (i < linhas)
     {
         j = 0;
-        while (j < Vcoluna)
+        while (j < colunas)
         {
-            if (i == 0 || i == Vlinha - 1 || j == 0 || j == Vcoluna - 1)
-            {
-                Vmapa[i][j] = '*';
-                Vchao[i][j] = '*';
-            }
-            else if ((i - centro_x) * (i - centro_x) + (j - centro_y) * (j - centro_y) <= raio * raio)
-            {
-                Vmapa[i][j] = ' ';
-                Vchao[i][j] = ' ';
-            }
-            else
-            {
-                Vmapa[i][j] = '.';
-                Vchao[i][j] = '.';
-            }
+            printf("%c ", mapas[Nfase][i][j]);
             j++;
         }
+        printf("\n");
         i++;
     }
+}
 
-    Vmapa[px][py] = '&';
-    Vmapa[1][2] = 'P';
-    Vmapa[12][7] = 'D';
-    Vmapa[12][9] = 'P';
-    Vmapa[13][13] = '@';
+void TrocarFase(int novafase)
+{
+    mapas[Nfase][px][py] = chaos[Nfase][px][py]; // Limpa Jogador Na Fase Atual
+
+    // Att Fase
+    Nfase = novafase;
+    px = pxinicial[Nfase];
+    py = pyinicial[Nfase];
+
+    // Coloca Jogador Na Nova Fase
+    mapas[Nfase][px][py] = '&';
+
+    system("cls");
+    Sleep(500);
+    printf("Descendo Para o Andar %d...Cada Vez Mais Perto Do Inferno!", Nfase + 1);
+    system("cls");
+
+    RenderizarMapa();
 }
 
 void entradamenu(void)
@@ -183,18 +239,35 @@ ini:
             printf("Iniciando Jogo...\n");
             Sleep(1000);
 
+            int fase = 0;
+            while (fase < TFases)
+            {
+                IniFase(fase);
+                fase++;
+            }
+
+            // Coloca o Jogador Na Fase Inicial
+            Nfase = 0;
+            px = pxinicial[Nfase];
+            py = pyinicial[Nfase];
+            mapas[Nfase][px][py] = '&';
+
             while (1)
             {
                 COORD pos = {0, 0};
                 SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
 
-                i = 0;
-                while (i < Vlinha)
+                // Carrega Mapa Atual
+                int linhas = dimensoesfases[Nfase][0];
+                int colunas = dimensoesfases[Nfase][1];
+
+                int i = 0, j = 0;
+                while (i < linhas)
                 {
                     j = 0;
-                    while (j < Vcoluna)
+                    while (j < colunas)
                     {
-                        printf("%c ", (Nfase == 0) ? Vmapa[i][j] : F1mapa[i][j]);
+                        printf("%c ", mapas[Nfase][i][j]);
                         j++;
                     }
                     printf("\n");
@@ -204,7 +277,7 @@ ini:
                 if (tutorial == 1)
                 {
                     dialogo = 1;
-                    printf("Ola Aventureiro");
+                    printf("Ola Aventureiro, Use 'WASD' Para Se Movimentar, e Use 'E' Para Interação");
 
                     while (dialogo == 1)
                     {
@@ -219,14 +292,9 @@ ini:
                 }
 
                 input = getch();
-                if (Nfase == 0 && Vmapa[px][py] == '&')
-                {
-                    Vmapa[px][py] = Vchao[px][py];
-                }
-                else if (Nfase == 1 && F1mapa[px][py] == '&')
-                {
-                    F1mapa[px][py] = F1chao[px][py];
-                }
+
+                // Limpa Posição
+                mapas[Nfase][px][py] = chaos[Nfase][px][py];
 
                 if (input == 39)
                 {
@@ -235,29 +303,27 @@ ini:
                 }
 
                 // Verifica se está na porta aberta para trocar de mapa
-                if (Nfase == 0 && Vmapa[px][py] == '=')
+                if (mapas[Nfase][px][py] == '=')
                 {
-                    system("cls");
-                    fase1();
-                    px = 2;
-                    py = 1;
-                    Nfase = 1;
-                    continue;
+                    if (Nfase < TFases - 1)
+                    {
+                        TrocarFase(Nfase + 1);
+                    }
+                    else
+                    {
+                        printf("Você chegou ao nível mais profundo do inferno!");
+                    }
                 }
 
                 switch (input)
                 {
                 case 'd':
                 case 'D':
-                    if (py < Vcoluna - 1)
+                    if (py < dimensoesfases[Nfase][1] - 1)
                     {
-                        char* mapaAtual = (Nfase == 0) ? &Vmapa[px][py] : &F1mapa[px][py];
-                        char* chaoAtual = (Nfase == 0) ? &Vchao[px][py] : &F1chao[px][py];
-                        char proximo = (Nfase == 0) ? Vmapa[px][py + 1] : F1mapa[px][py + 1];
-                        
+                        char proximo = mapas[Nfase][px][py + 1];
                         if (proximo != '*' && proximo != '#' && proximo != 'P' && proximo != 'D' && proximo != '@' && proximo != ' ')
                         {
-                            *chaoAtual = *mapaAtual;
                             py++;
                         }
                     }
@@ -267,13 +333,9 @@ ini:
                 case 'A':
                     if (py > 0)
                     {
-                        char* mapaAtual = (Nfase == 0) ? &Vmapa[px][py] : &F1mapa[px][py];
-                        char* chaoAtual = (Nfase == 0) ? &Vchao[px][py] : &F1chao[px][py];
-                        char proximo = (Nfase == 0) ? Vmapa[px][py - 1] : F1mapa[px][py - 1];
-                        
+                        char proximo = mapas[Nfase][px][py - 1];
                         if (proximo != '*' && proximo != '#' && proximo != 'P' && proximo != 'D' && proximo != '@' && proximo != ' ')
                         {
-                            *chaoAtual = *mapaAtual;
                             py--;
                         }
                     }
@@ -281,15 +343,11 @@ ini:
 
                 case 's':
                 case 'S':
-                    if (px < Vlinha - 1)
+                    if (px < dimensoesfases[Nfase][0] - 1)
                     {
-                        char* mapaAtual = (Nfase == 0) ? &Vmapa[px][py] : &F1mapa[px][py];
-                        char* chaoAtual = (Nfase == 0) ? &Vchao[px][py] : &F1chao[px][py];
-                        char proximo = (Nfase == 0) ? Vmapa[px + 1][py] : F1mapa[px + 1][py];
-                        
+                        char proximo = mapas[Nfase][px + 1][py];
                         if (proximo != '*' && proximo != '#' && proximo != 'P' && proximo != 'D' && proximo != '@' && proximo != ' ')
                         {
-                            *chaoAtual = *mapaAtual;
                             px++;
                         }
                     }
@@ -299,13 +357,9 @@ ini:
                 case 'W':
                     if (px > 0)
                     {
-                        char* mapaAtual = (Nfase == 0) ? &Vmapa[px][py] : &F1mapa[px][py];
-                        char* chaoAtual = (Nfase == 0) ? &Vchao[px][py] : &F1chao[px][py];
-                        char proximo = (Nfase == 0) ? Vmapa[px - 1][py] : F1mapa[px - 1][py];
-                        
+                        char proximo = mapas[Nfase][px - 1][py];
                         if (proximo != '*' && proximo != '#' && proximo != 'P' && proximo != 'D' && proximo != '@' && proximo != ' ')
                         {
-                            *chaoAtual = *mapaAtual;
                             px--;
                         }
                     }
@@ -315,67 +369,108 @@ ini:
                 case 'E':
                     if (tutorial == 0)
                     {
-                        if ((abs(px - 1) <= 1 && abs(py - 2) <= 1) && Nfase == 0 && Vmapa[1][2] == 'P')
+                        int i = px - 1;
+                        while (i <= px + 1)
                         {
-                            dialogo = 1;
-                            printf("Ola Aventureiro");
-
-                            while (dialogo == 1)
+                            int j = py - 1;
+                            while (j <= py + 1)
                             {
-                                input = getch();
-                                if (input == 101 || input == 27)
+                                // Verifica se está dentro dos limites do mapa
+                                if (i >= 0 && i < dimensoesfases[Nfase][0] &&
+                                    j >= 0 && j < dimensoesfases[Nfase][1])
                                 {
-                                    dialogo = 0;
-                                    printf("\033[16;1H\033[K");
-                                    tutorial = 0;
+
+                                    char obj = mapas[Nfase][i][j];
+                                    if (obj == 'P')
+                                    {
+                                        dialogo = 1;
+                                        if(Nfase == 0)
+                                        {
+                                            printf("\033[s");
+                                            printf("\n");
+                                            printf("\n\033[1mAnciao: Esse eh o grande abismo do inferno, dizem que a seculos ou milenios atras,"
+                                            " caiu um grande meteoro carregado de magia bem nesse lugar, e fez essa \ncratera enorme,"
+                                            " com o passar dos seculos, os aventureiros tentaram explorar o abismo para obter recursos,"
+                                            " e perceberam que os recursos eram extremamente \nabundantes, diversos itens magicos e materiais "
+                                            "de valor altissimo, e fazendo diversas obras de construcao, tijolo por tijolo ate formar uma grande"
+                                            " masmorra \ncom centenas, ou ate milhares de andares, agora milenios depois nossa vila foi construida"
+                                            " em volta dessa masmorra e nos nao conhecemos o responsavel pela \nconstrucao e muito menos o quao profunda"
+                                            " ela pode ir, so sabemos que varios aventureiros descem e poucos dos que exploram os andares mais profundos"
+                                            " \nconseguem retornar.\033[0m");
+                                        }
+
+                                        while (dialogo == 1)
+                                        {
+                                            input = getch();
+                                            if (input == 101 || input == 27)
+                                            {
+                                                printf("\033[u");
+                                                printf("\033[0J");
+                                                dialogo = 0;
+                                            }
+                                        }
+                                    }
+                                    else if (obj == '@')
+                                    {
+                                        mapas[Nfase][i][j] = '.';
+                                        printf("Voce coletou um item especial!");
+                                        Sleep(500);
+                                        printf("\033[16;1H\033[K");
+
+                                        // Na Vila, transforma a porta em '=' quando pega o item
+                                        if (Nfase == 0)
+                                        {
+                                            mapas[0][12][7] = '=';
+                                            chaos[0][12][7] = '=';
+                                        }
+
+                                        else if (Nfase == 1)
+                                        {
+                                            mapas[1][12][7] = '=';
+                                            chaos[1][12][7] = '=';
+                                        }
+                                        else if (Nfase == 2)
+                                        {
+                                            mapas[2][12][7] = '=';
+                                            chaos[2][12][7] = '=';    
+                                        }
+                                    }
                                 }
+                                j++;
                             }
+                            i++;
                         }
                     }
-
-                    if ((abs(px - 13) <= 1 && abs(py - 13) <= 1) && Nfase == 0 && Vmapa[13][13] == '@')
-                    {
-                        Vmapa[13][13] = '.';
-                        Vchao[13][13] = '.';
-
-                        Vmapa[12][7] = '=';
-                        Vchao[12][7] = '=';
-                    }
                     break;
-                }
-                
-                // Atualiza a posição do jogador no mapa correto
-                if (Nfase == 0)
-                    Vmapa[px][py] = '&';
-                else
-                    F1mapa[px][py] = '&';
             }
-            break;
 
-        case 1:
-            printf("\tDesenvolvido por:\n");
-            printf("Programacao Por: Icaro Sousa, Daniel Silva, Rafael Rian\n");
-            printf("Design Do Jogo Por:Daniel Silva\n");
-            printf("Historia Do Jogo Por: Icaro Sousa\n");
-            printf("\n\tAgradecimentos Especiais:\n");
-            printf("A todos que apoiaram e jogaram Dungeons of Infernus!");
-            break;
-
-        case 2:
-            printf("\033[1;31mOs portais de Dungeons of Infernus sempre estarao abertos para voce. Volte quando quiser, mas cuidado... o fogo do inferno nunca se apaga.\033[0m\n");
-            exit(0);
+            // Atualiza a posição do jogador
+            mapas[Nfase][px][py] = '&';
         }
-        getch();
-        desenharmenu();
+        break;
+
+    case 1:
+        printf("\tDesenvolvido por:\n");
+        printf("Programacao Por: Icaro Sousa, Daniel Silva, Rafael Rian\n");
+        printf("Design Do Jogo Por:Daniel Silva\n");
+        printf("Historia Do Jogo Por: Icaro Sousa\n");
+        printf("\n\tAgradecimentos Especiais:\n");
+        printf("A todos que apoiaram e jogaram Dungeons of Infernus!");
+        break;
+
+    case 2:
+        printf("\033[1;31mOs portais de Dungeons of Infernus sempre estarao abertos para voce. Volte quando quiser, mas cuidado... o fogo do inferno nunca se apaga.\033[0m\n");
+        exit(0);
     }
+    getch();
+    desenharmenu();
+}
 }
 
 int main(void)
 {
     printf("\033[?25l");
     desenharmenu();
-
-    Vila(Vmapa);
 
     while (1)
     {
