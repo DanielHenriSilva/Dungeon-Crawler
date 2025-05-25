@@ -277,12 +277,15 @@ ini:
                 if (tutorial == 1)
                 {
                     dialogo = 1;
-                    printf("Ola Aventureiro, Use 'WASD' Para Se Movimentar, e Use 'E' Para Interação");
+                    printf("Anciao: Ola Aventureiro, Vamos Para Um Breve Tutorial, Use 'WASD' Para Andar, Use 'E' Para Interagir Com 'P'(NPC), '@'(Chave), 'O'(Botao)\n");
+                    printf("\033[3;35HLegenda Dos Caracteres:\033[4;35H'P' = NPC\033[5;35H'@' = Chave\033[6;35H'O' = Botao" 
+                    "\033[7;35H'D' = Porta\033[8;35H'=' = Porta Aberta\033[9;35H'#' = Espinhos\033[10;35H'*' = Parede\033[11;35H'>' = Teletransporte"
+                    "\033[12;35H'X' = Monstro Nivel 1\033[13;35H'V' = Monstro Nivel 2");
 
                     while (dialogo == 1)
                     {
                         input = getch();
-                        if (input == 101 || input == 27)
+                        if (input == 101 || input == 27 || input == 69)
                         {
                             dialogo = 0;
                             printf("\033[16;1H\033[K");
@@ -402,7 +405,7 @@ ini:
                                         while (dialogo == 1)
                                         {
                                             input = getch();
-                                            if (input == 101 || input == 27)
+                                            if (input == 101 || input == 27 || input == 69)
                                             {
                                                 printf("\033[u");
                                                 printf("\033[0J");
