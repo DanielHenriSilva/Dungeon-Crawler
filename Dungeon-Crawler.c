@@ -21,7 +21,7 @@ int dimensoesfases[TFases][2] =
 int pxinicial[TFases] = {1, 1, 1, 1}, pyinicial[TFases] = {1, 1, 1, 1};
 
 int px, py;
-int dialogo = 0, Nfase = 0, tutorial = 1;
+int dialogo = 0, Nfase = 0, tutorial = 1, jogar = 1;;
 
 char input;
 COORD coord = {0, 0};
@@ -86,8 +86,6 @@ void menu()
 
     gotoxy(22, 77);
     printf("%sExit\033[0m", selecionar == 2 ? "\033[1;31m" : "");
-
-    fflush(stdout);
 }
 
 void IniFase(int fase)
@@ -167,7 +165,7 @@ void IniFase(int fase)
         mapas[fase][7][10] = '#';
         mapas[fase][8][10] = 'O';  // Botão
         mapas[fase][15][15] = 'X'; // Monstro nível 1
-        mapas[fase][20][20] = 'V'; // Monstro nível 2
+        //mapas[fase][20][20] = 'V'; // Monstro nível 2
         mapas[fase][10][10] = '>'; // Teletransporte 1
         mapas[fase][30][30] = '>'; // Teletransporte 2
     }
@@ -180,11 +178,10 @@ void IniFase(int fase)
 
 void ReiniciarFase()
 {
-    system("cls");
     static int tentativas = 0;
     tentativas++;
 
-    if (tentativas < 1)
+    if (tentativas < 3)
     {
         px = pxinicial[Nfase];
         py = pyinicial[Nfase];
@@ -194,18 +191,18 @@ void ReiniciarFase()
     }
     else
     {
+        jogar = 0;
         px = pxinicial[Nfase];
         py = pyinicial[Nfase];
 
-        /*system("cls || clear");
-        printf("\033[3J\033[H");
+        system("cls || clear");
 
         printf("\033[1;31mVoce falhou muitas vezes! Voltando ao menu principal...\033[0m");
-        Sleep(2000);*/
+        Sleep(1000);
 
         system("cls || clear");
-        // desenharmenu();
-        // menu();
+        desenharmenu();
+        menu();
     }
 }
 
@@ -340,6 +337,34 @@ void TrocarFase(int novafase)
     RenderizarMapa();
 }
 
+void VerificarTeletransporte() {
+    if (Nfase != 3) return; // Só tem teletransporte na fase 3
+    
+    if (mapas[Nfase][px][py] == '>') 
+    {
+        int linhas = dimensoesfases[Nfase][0];
+        int colunas = dimensoesfases[Nfase][1];
+        
+        // Encontra o outro teletransporte
+        for (int i = 0; i < linhas; i++) 
+        {
+            for (int j = 0; j < colunas; j++) 
+            {
+                if (mapas[Nfase][i][j] == '>' && (i != px || j != py)) 
+                {
+                    mapas[Nfase][px][py] = chaos[Nfase][px][py];
+                    px = i;
+                    py = j;
+                    mapas[Nfase][px][py] = '&';
+                    printf("\033[1;35mTeletransportado!\033[0m");
+                    Sleep(500);
+                    return;
+                }
+            }
+        }
+    }
+}
+
 void MostrarVitoria()
 {
     system("cls || clear");
@@ -357,6 +382,7 @@ void MostrarVitoria()
 
 void entradamenu(void)
 {
+    jogar = 1;
     int inicio = 0;
 ini:
     if (inicio == 1)
@@ -387,7 +413,7 @@ ini:
     }
     else if (input == enter)
     {
-        system("cls || clear");
+        system("cls");
         switch (selecionar)
         {
         case 0:
@@ -407,7 +433,7 @@ ini:
             py = pyinicial[Nfase];
             mapas[Nfase][px][py] = '&';
 
-            while (1)
+            while (jogar == 1)
             {
                 COORD pos = {0, 0};
                 SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
@@ -460,7 +486,7 @@ ini:
 
                 VerificarEspinhos();
                 Monstros();
-                // VerificarTeletransporte();
+                VerificarTeletransporte();
 
                 switch (input)
                 {
@@ -580,6 +606,26 @@ ini:
                                         {
                                             mapas[2][12][7] = '=';
                                             chaos[2][12][7] = '=';
+                                        }
+                                    }
+                                    else if (obj == 'O') // Botão
+                                    {  
+                                        printf("\033[1;33mBotao ativado! Uma passagem secreta se abre...\033[0m");
+                                        Sleep(500);
+                                        printf("\033[16;1H\033[K");
+                                        mapas[2][8][10] = 'O';
+                                        chaos[2][8][10] = 'O';
+                                    
+                                        // Exemplo: transforma algumas paredes em chão
+                                        if (Nfase == 2) 
+                                        {
+                                            mapas[2][8][10] = 'O';
+                                            chaos[2][8][10] = 'O';
+                                        } 
+                                        else if (Nfase == 3) 
+                                        {
+                                            mapas[3][25][25] = '.';
+                                            chaos[3][25][25] = '.';
                                         }
                                     }
                                 }
