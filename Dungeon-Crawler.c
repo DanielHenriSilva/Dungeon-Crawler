@@ -39,7 +39,7 @@ void gotoxy(int x, int y)
 
 void desenharmenu(void)
 {
-    system("cls");
+    system("cls || clear");
 
     int i = 0;
     while (i < 5)
@@ -86,6 +86,8 @@ void menu()
 
     gotoxy(22, 77);
     printf("%sExit\033[0m", selecionar == 2 ? "\033[1;31m" : "");
+
+    fflush(stdout);
 }
 
 void IniFase(int fase)
@@ -143,18 +145,156 @@ void IniFase(int fase)
         mapas[fase][5][5] = 'P';
         mapas[fase][12][7] = 'D';
         mapas[fase][13][13] = '@';
+        mapas[fase][10][10] = 'X';
     }
     else if (fase == 2) // Dungeon 2
     {
         mapas[fase][12][7] = 'D';
         mapas[fase][13][13] = '@';
+        mapas[fase][5][10] = '#';
+        mapas[fase][6][10] = '#';
+        mapas[fase][7][10] = '#';
+        mapas[fase][8][10] = 'O';  // Botão
+        mapas[fase][15][15] = 'X'; // Monstro nível 1
     }
 
-    // Adiconar os outros mapas
+    else // Dungeon 3
+    {
+        mapas[fase][12][7] = 'D';
+        mapas[fase][13][13] = '@';
+        mapas[fase][5][10] = '#';
+        mapas[fase][6][10] = '#';
+        mapas[fase][7][10] = '#';
+        mapas[fase][8][10] = 'O';  // Botão
+        mapas[fase][15][15] = 'X'; // Monstro nível 1
+        mapas[fase][20][20] = 'V'; // Monstro nível 2
+        mapas[fase][10][10] = '>'; // Teletransporte 1
+        mapas[fase][30][30] = '>'; // Teletransporte 2
+    }
 
     if (fase == Nfase)
     {
         mapas[fase][pxinicial[fase]][pyinicial[fase]] = '&';
+    }
+}
+
+void ReiniciarFase()
+{
+    system("cls");
+    static int tentativas = 0;
+    tentativas++;
+
+    if (tentativas < 1)
+    {
+        px = pxinicial[Nfase];
+        py = pyinicial[Nfase];
+        IniFase(Nfase);
+        printf("\033[1;31mFase reiniciada! Tentativas restantes: %d\033[0m", 3 - tentativas);
+        Sleep(1000);
+    }
+    else
+    {
+        px = pxinicial[Nfase];
+        py = pyinicial[Nfase];
+
+        /*system("cls || clear");
+        printf("\033[3J\033[H");
+
+        printf("\033[1;31mVoce falhou muitas vezes! Voltando ao menu principal...\033[0m");
+        Sleep(2000);*/
+
+        system("cls || clear");
+        // desenharmenu();
+        // menu();
+    }
+}
+
+void VerificarEspinhos()
+{
+    if (Nfase < 2)
+    {
+        return;
+    }
+
+    if (mapas[Nfase][px][py] == '#')
+    {
+        ReiniciarFase();
+    }
+}
+
+void Monstros()
+{
+    if (Nfase < 1)
+    {
+        return;
+    }
+
+    int linhas = dimensoesfases[Nfase][0];
+    int colunas = dimensoesfases[Nfase][1];
+
+    int i = 0;
+    while (i < linhas)
+    {
+        int j = 0;
+        while (j < colunas)
+        {
+            if (mapas[Nfase][i][j] == 'X') // Mostro LVL 1
+            {
+                int direcao = rand() % 4;
+                int ni = i, nj = j;
+
+                switch (direcao)
+                {
+                case 0:
+                    ni--; // Cima
+                    break;
+                case 1:
+                    ni++; // Baixo
+                    break;
+                case 2:
+                    nj--; // Esquerda
+                    break;
+                case 3:
+                    nj++; // Direita
+                    break;
+                }
+                if (ni >= 0 && ni < linhas && nj >= 0 && nj < colunas &&
+                    chaos[Nfase][ni][nj] == '.')
+                {
+                    mapas[Nfase][i][j] = chaos[Nfase][i][j];
+                    mapas[Nfase][ni][nj] = 'X';
+                    if (ni == px && nj == py)
+                    {
+                        ReiniciarFase();
+                    }
+                    break;
+                }
+            }
+            else if (mapas[Nfase][i][j] == 'V') // MONSTRO LVL 2
+            {
+                int di = (px > i) ? 1 : (px < i) ? -1
+                                                 : 0;
+                int dj = (py > j) ? 1 : (py < j) ? -1
+                                                 : 0;
+
+                int ni = i + di;
+                int nj = j + dj;
+
+                if (ni >= 0 && ni < linhas && nj >= 0 && nj < colunas &&
+                    chaos[Nfase][ni][nj] == '.')
+                {
+                    mapas[Nfase][i][j] = chaos[Nfase][i][j];
+                    mapas[Nfase][ni][nj] = 'V';
+
+                    if (ni == px && nj == py)
+                    {
+                        ReiniciarFase();
+                    }
+                }
+            }
+            j++;
+        }
+        i++;
     }
 }
 
@@ -195,9 +335,24 @@ void TrocarFase(int novafase)
     system("cls");
     Sleep(500);
     printf("Descendo Para o Andar %d...Cada Vez Mais Perto Do Inferno!", Nfase + 1);
-    system("cls");
+    system("cls || clear");
 
     RenderizarMapa();
+}
+
+void MostrarVitoria()
+{
+    system("cls || clear");
+    printf("\033[1;32m");
+    printf("\n\n\n\n\n\n\n");
+    printf("%*s\n", 50, "PARABENS AVENTUREIRO!");
+    printf("%*s\n", 45, "Voce conquistou as masmorras");
+    printf("%*s\n", 40, "do inferno!");
+    printf("\033[0m");
+    Sleep(3000);
+    Nfase = 0;
+    system("cls || clear");
+    desenharmenu();
 }
 
 void entradamenu(void)
@@ -232,7 +387,7 @@ ini:
     }
     else if (input == enter)
     {
-        system("cls");
+        system("cls || clear");
         switch (selecionar)
         {
         case 0:
@@ -256,31 +411,15 @@ ini:
             {
                 COORD pos = {0, 0};
                 SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
-
-                // Carrega Mapa Atual
-                int linhas = dimensoesfases[Nfase][0];
-                int colunas = dimensoesfases[Nfase][1];
-
-                int i = 0, j = 0;
-                while (i < linhas)
-                {
-                    j = 0;
-                    while (j < colunas)
-                    {
-                        printf("%c ", mapas[Nfase][i][j]);
-                        j++;
-                    }
-                    printf("\n");
-                    i++;
-                }
+                RenderizarMapa();
 
                 if (tutorial == 1)
                 {
                     dialogo = 1;
                     printf("Anciao: Ola Aventureiro, Vamos Para Um Breve Tutorial, Use 'WASD' Para Andar, Use 'E' Para Interagir Com 'P'(NPC), '@'(Chave), 'O'(Botao)\n");
-                    printf("\033[3;35HLegenda Dos Caracteres:\033[4;35H'P' = NPC\033[5;35H'@' = Chave\033[6;35H'O' = Botao" 
-                    "\033[7;35H'D' = Porta\033[8;35H'=' = Porta Aberta\033[9;35H'#' = Espinhos\033[10;35H'*' = Parede\033[11;35H'>' = Teletransporte"
-                    "\033[12;35H'X' = Monstro Nivel 1\033[13;35H'V' = Monstro Nivel 2");
+                    printf("\033[3;35HLegenda Dos Caracteres:\033[4;35H'P' = NPC\033[5;35H'@' = Chave\033[6;35H'O' = Botao"
+                           "\033[7;35H'D' = Porta\033[8;35H'=' = Porta Aberta\033[9;35H'#' = Espinhos\033[10;35H'*' = Parede\033[11;35H'>' = Teletransporte"
+                           "\033[12;35H'X' = Monstro Nivel 1\033[13;35H'V' = Monstro Nivel 2");
 
                     while (dialogo == 1)
                     {
@@ -312,11 +451,16 @@ ini:
                     {
                         TrocarFase(Nfase + 1);
                     }
-                    else
+                    else if (Nfase == 3)
                     {
-                        printf("Você chegou ao nível mais profundo do inferno!");
+                        MostrarVitoria();
+                        break;
                     }
                 }
+
+                VerificarEspinhos();
+                Monstros();
+                // VerificarTeletransporte();
 
                 switch (input)
                 {
@@ -325,7 +469,7 @@ ini:
                     if (py < dimensoesfases[Nfase][1] - 1)
                     {
                         char proximo = mapas[Nfase][px][py + 1];
-                        if (proximo != '*' && proximo != '#' && proximo != 'P' && proximo != 'D' && proximo != '@' && proximo != ' ')
+                        if (proximo != '*' && proximo != 'P' && proximo != 'D' && proximo != '@' && proximo != ' ' && proximo != 'X' && proximo != 'V')
                         {
                             py++;
                         }
@@ -337,7 +481,7 @@ ini:
                     if (py > 0)
                     {
                         char proximo = mapas[Nfase][px][py - 1];
-                        if (proximo != '*' && proximo != '#' && proximo != 'P' && proximo != 'D' && proximo != '@' && proximo != ' ')
+                        if (proximo != '*' && proximo != 'P' && proximo != 'D' && proximo != '@' && proximo != ' ' && proximo != 'X' && proximo != 'V')
                         {
                             py--;
                         }
@@ -349,7 +493,7 @@ ini:
                     if (px < dimensoesfases[Nfase][0] - 1)
                     {
                         char proximo = mapas[Nfase][px + 1][py];
-                        if (proximo != '*' && proximo != '#' && proximo != 'P' && proximo != 'D' && proximo != '@' && proximo != ' ')
+                        if (proximo != '*' && proximo != 'P' && proximo != 'D' && proximo != '@' && proximo != ' ' && proximo != 'X' && proximo != 'V')
                         {
                             px++;
                         }
@@ -361,7 +505,7 @@ ini:
                     if (px > 0)
                     {
                         char proximo = mapas[Nfase][px - 1][py];
-                        if (proximo != '*' && proximo != '#' && proximo != 'P' && proximo != 'D' && proximo != '@' && proximo != ' ')
+                        if (proximo != '*' && proximo != 'P' && proximo != 'D' && proximo != '@' && proximo != ' ' && proximo != 'X' && proximo != 'V')
                         {
                             px--;
                         }
@@ -387,19 +531,19 @@ ini:
                                     if (obj == 'P')
                                     {
                                         dialogo = 1;
-                                        if(Nfase == 0)
+                                        if (Nfase == 0)
                                         {
                                             printf("\033[s");
                                             printf("\n");
                                             printf("\n\033[1mAnciao: Esse eh o grande abismo do inferno, dizem que a seculos ou milenios atras,"
-                                            " caiu um grande meteoro carregado de magia bem nesse lugar, e fez essa \ncratera enorme,"
-                                            " com o passar dos seculos, os aventureiros tentaram explorar o abismo para obter recursos,"
-                                            " e perceberam que os recursos eram extremamente \nabundantes, diversos itens magicos e materiais "
-                                            "de valor altissimo, e fazendo diversas obras de construcao, tijolo por tijolo ate formar uma grande"
-                                            " masmorra \ncom centenas, ou ate milhares de andares, agora milenios depois nossa vila foi construida"
-                                            " em volta dessa masmorra e nos nao conhecemos o responsavel pela \nconstrucao e muito menos o quao profunda"
-                                            " ela pode ir, so sabemos que varios aventureiros descem e poucos dos que exploram os andares mais profundos"
-                                            " \nconseguem retornar.\033[0m");
+                                                   " caiu um grande meteoro carregado de magia bem nesse lugar, e fez essa \ncratera enorme,"
+                                                   " com o passar dos seculos, os aventureiros tentaram explorar o abismo para obter recursos,"
+                                                   " e perceberam que os recursos eram extremamente \nabundantes, diversos itens magicos e materiais "
+                                                   "de valor altissimo, e fazendo diversas obras de construcao, tijolo por tijolo ate formar uma grande"
+                                                   " masmorra \ncom centenas, ou ate milhares de andares, agora milenios depois nossa vila foi construida"
+                                                   " em volta dessa masmorra e nos nao conhecemos o responsavel pela \nconstrucao e muito menos o quao profunda"
+                                                   " ela pode ir, so sabemos que varios aventureiros descem e poucos dos que exploram os andares mais profundos"
+                                                   " \nconseguem retornar.\033[0m");
                                         }
 
                                         while (dialogo == 1)
@@ -435,7 +579,7 @@ ini:
                                         else if (Nfase == 2)
                                         {
                                             mapas[2][12][7] = '=';
-                                            chaos[2][12][7] = '=';    
+                                            chaos[2][12][7] = '=';
                                         }
                                     }
                                 }
@@ -445,29 +589,29 @@ ini:
                         }
                     }
                     break;
+                }
+
+                // Atualiza a posição do jogador
+                mapas[Nfase][px][py] = '&';
             }
+            break;
 
-            // Atualiza a posição do jogador
-            mapas[Nfase][px][py] = '&';
+        case 1:
+            printf("\tDesenvolvido por:\n");
+            printf("Programacao Por: Icaro Sousa, Daniel Silva, Rafael Rian\n");
+            printf("Design Do Jogo Por:Daniel Silva\n");
+            printf("Historia Do Jogo Por: Icaro Sousa\n");
+            printf("\n\tAgradecimentos Especiais:\n");
+            printf("A todos que apoiaram e jogaram Dungeons of Infernus!");
+            break;
+
+        case 2:
+            printf("\033[1;31mOs portais de Dungeons of Infernus sempre estarao abertos para voce. Volte quando quiser, mas cuidado... o fogo do inferno nunca se apaga.\033[0m\n");
+            exit(0);
         }
-        break;
-
-    case 1:
-        printf("\tDesenvolvido por:\n");
-        printf("Programacao Por: Icaro Sousa, Daniel Silva, Rafael Rian\n");
-        printf("Design Do Jogo Por:Daniel Silva\n");
-        printf("Historia Do Jogo Por: Icaro Sousa\n");
-        printf("\n\tAgradecimentos Especiais:\n");
-        printf("A todos que apoiaram e jogaram Dungeons of Infernus!");
-        break;
-
-    case 2:
-        printf("\033[1;31mOs portais de Dungeons of Infernus sempre estarao abertos para voce. Volte quando quiser, mas cuidado... o fogo do inferno nunca se apaga.\033[0m\n");
-        exit(0);
+        getch();
+        desenharmenu();
     }
-    getch();
-    desenharmenu();
-}
 }
 
 int main(void)
