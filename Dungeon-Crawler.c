@@ -220,6 +220,10 @@ void IniFase(int fase) {
         mapas[fase][20][20] = '*';
         mapas[fase][20][21] = '*';
         mapas[fase][20][23] = '*';
+        mapas[fase][21][23] = '*';
+        mapas[fase][22][23] = '*';
+        mapas[fase][23][23] = '*';
+        mapas[fase][20][12] = '*';
         mapas[fase][22][19] = 'X';
         mapas[fase][2][5] = 'X';
         mapas[fase][5][14] = 'X';
