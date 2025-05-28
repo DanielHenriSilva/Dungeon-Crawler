@@ -2,26 +2,27 @@
 #include <stdlib.h>
 #include <conio.h>
 #include <windows.h>
+#include <time.h>
 
-#define MaximoDeLinhas 45
-#define MaximoDeColunas 45
+#define MaximoDeLinhas 40
+#define MaximoDeColunas 40
 #define TFases 4
 
 char mapas[TFases][MaximoDeLinhas][MaximoDeColunas];
 char chaos[TFases][MaximoDeLinhas][MaximoDeColunas];
 
-int dimensoesfases[TFases][2] =
-    {
-        {15, 15}, // Fase 0: Vila
-        {15, 15}, // Fase 1: Dungeon 1
-        {25, 25}, // Fase 2: Dungeon 2
-        {45, 45}  // Fase 3: Dungeon 3
+int dimensoesfases[TFases][2] = {
+    {15, 15}, // Fase 0: Vila
+    {15, 15}, // Fase 1: Dungeon 1
+    {25, 25}, // Fase 2: Dungeon 2
+    {40, 40}  // Fase 3: Dungeon 3
 };
 
 int pxinicial[TFases] = {1, 1, 1, 1}, pyinicial[TFases] = {1, 1, 1, 1};
 
 int px, py;
-int dialogo = 0, Nfase = 0, tutorial = 1, jogar = 1;;
+int dialogo = 0, Nfase = 0, tutorial = 1, jogar = 1;
+int tentativasFase = 0;
 
 char input;
 COORD coord = {0, 0};
@@ -32,18 +33,15 @@ COORD coord = {0, 0};
 
 int selecionar = 0; // 0=Play, 1=Credit, 2=Exit
 
-void gotoxy(int x, int y)
-{
+void gotoxy(int x, int y) {
     printf("\033[%d;%dH", x + 1, y + 1);
 }
 
-void desenharmenu(void)
-{
+void desenharmenu(void) {
     system("cls || clear");
 
     int i = 0;
-    while (i < 5)
-    {
+    while (i < 5) {
         printf("\n");
         i++;
     }
@@ -55,8 +53,7 @@ void desenharmenu(void)
     printf("\033[0m");
 
     i = 0;
-    while (i < 2)
-    {
+    while (i < 2) {
         printf("\n");
         i++;
     }
@@ -72,8 +69,7 @@ void desenharmenu(void)
     printf("\033[0m");
 }
 
-void menu()
-{
+void menu() {
     printf("\033[20;1H\033[K");
     printf("\033[21;1H\033[K");
     printf("\033[22;1H\033[K");
@@ -88,41 +84,49 @@ void menu()
     printf("%sExit\033[0m", selecionar == 2 ? "\033[1;31m" : "");
 }
 
-void IniFase(int fase)
-{
+void MostrarDerrota() {
+    system("cls || clear");
+    printf("\033[1;31m");
+    printf("\n\n\n\n\n\n\n");
+    printf("%*s\n", 45, "VOCE FRACASSOU!");
+    printf("%*s\n", 45, "As masmorras do inferno consumiram voce.");
+    printf("%*s\n", 40, "Tente novamente, aventureiro!");
+    printf("\033[0m");
+    Sleep(3000);
+    Nfase = 0;
+    jogar = 0;
+    tentativasFase = 0;
+    system("cls || clear");
+    desenharmenu();
+}
+
+void IniFase(int fase) {
     int linhas = dimensoesfases[fase][0];
     int colunas = dimensoesfases[fase][1];
 
     int li = 0, co = 0;
-    while (li < linhas)
-    {
+    while (li < linhas) {
         co = 0;
-        while (co < colunas)
-        {
-            if (li == 0 || li == linhas - 1 || co == 0 || co == colunas - 1)
-            {
+        while (co < colunas) {
+            if (li == 0 || li == linhas - 1 || co == 0 || co == colunas - 1) {
                 mapas[fase][li][co] = '*';
                 chaos[fase][li][co] = mapas[fase][li][co];
             }
-            else if (fase == 0)
-            {
+            else if (fase == 0) {
                 int centroX = linhas / 2;
                 int centroY = colunas / 2;
                 int raio = 4;
 
-                if ((li - centroX) * (li - centroX) + (co - centroY) * (co - centroY) <= raio * raio)
-                {
+                if ((li - centroX) * (li - centroX) + (co - centroY) * (co - centroY) <= raio * raio) {
                     mapas[fase][li][co] = ' ';
                     chaos[fase][li][co] = ' ';
                 }
-                else
-                {
+                else {
                     mapas[fase][li][co] = '.';
                     chaos[fase][li][co] = '.';
                 }
             }
-            else
-            {
+            else {
                 mapas[fase][li][co] = '.';
                 chaos[fase][li][co] = '.';
             }
@@ -131,242 +135,288 @@ void IniFase(int fase)
         li++;
     }
 
-    // Adiciona elementos específicos de casa fase
-    if (fase == 0) // Fase Da Vila
-    {
+    // Adiciona elementos específicos de cada fase
+    if (fase == 0) { // Fase Da Vila
         mapas[fase][1][2] = 'P';
+        mapas[fase][12][5] = 'P';
         mapas[fase][12][7] = 'D';
         mapas[fase][13][13] = '@';
     }
-    else if (fase == 1) // Dungeon 1
-    {
+    else if (fase == 1) { // Dungeon 1
         mapas[fase][5][5] = 'P';
         mapas[fase][12][7] = 'D';
+        mapas[fase][3][5] = '#';
+        mapas[fase][3][6] = '#';
+        mapas[fase][3][7] = '#';
+        mapas[fase][3][8] = '#';
+        mapas[fase][3][9] = '#';
+        mapas[fase][3][10] = '#';
+        mapas[fase][3][11] = '#';
+        mapas[fase][3][12] = '#';
+        mapas[fase][4][7] = '#';
+        mapas[fase][5][7] = '#';
+        mapas[fase][6][7] = '#';
+        mapas[fase][6][9] = 'X';
+        mapas[fase][8][9] = '#';
+        mapas[fase][7][7] = '#';
+        mapas[fase][8][7] = '#';
+        mapas[fase][8][8] = '#';
+        mapas[fase][8][9] = '#';
+        mapas[fase][9][9] = '#';
+        mapas[fase][10][9] = '#';
+        mapas[fase][11][9] = '#';
+        mapas[fase][12][9] = '#';
+        mapas[fase][13][9] = '#';
         mapas[fase][13][13] = '@';
         mapas[fase][10][10] = 'X';
     }
-    else if (fase == 2) // Dungeon 2
-    {
+    else if (fase == 2) { // Dungeon 2
         mapas[fase][12][7] = 'D';
         mapas[fase][13][13] = '@';
         mapas[fase][5][10] = '#';
+        mapas[fase][5][6] = '*';
+        mapas[fase][5][5] = '*';
+        mapas[fase][5][4] = '*';
+        mapas[fase][5][3] = '*';
+        mapas[fase][5][2] = '*';
+        mapas[fase][5][1] = '*';
+        mapas[fase][2][5] = 'X';
+        mapas[fase][5][14] = 'X';
+        mapas[fase][5][17] = 'X';
         mapas[fase][6][10] = '#';
         mapas[fase][7][10] = '#';
-        mapas[fase][8][10] = 'O';  // Botão
-        mapas[fase][15][15] = 'X'; // Monstro nível 1
+        mapas[fase][8][10] = 'O';
+        mapas[fase][17][16] = 'X';
+        mapas[fase][18][20] = 'X';
     }
-
-    else // Dungeon 3
-    {
-        mapas[fase][12][7] = 'D';
-        mapas[fase][13][13] = '@';
-        mapas[fase][5][10] = '#';
-        mapas[fase][6][10] = '#';
-        mapas[fase][7][10] = '#';
-        mapas[fase][8][10] = 'O';  // Botão
-        mapas[fase][15][15] = 'X'; // Monstro nível 1
-        //mapas[fase][20][20] = 'V'; // Monstro nível 2
-        mapas[fase][10][10] = '>'; // Teletransporte 1
-        mapas[fase][30][30] = '>'; // Teletransporte 2
-    }
-
-    if (fase == Nfase)
-    {
+   else { // Dungeon 3
+    mapas[fase][12][7] = 'D';
+    mapas[fase][13][13] = '@';
+    mapas[fase][5][10] = '#';;
+    mapas[fase][6][10] = '#';
+    mapas[fase][7][10] = '#';
+    mapas[fase][8][10] = 'O';
+    mapas[fase][15][15] = 'X';
+    mapas[fase][20][20] = 'V';
+    
+   mapas[fase][10][10] = '>';  // Teletransporte 1
+    chaos[fase][10][10] = '>';   // Chão abaixo é normal
+    
+    mapas[fase][30][30] = '>';  // Teletransporte 2
+    chaos[fase][30][30] = '>';   // Chão abaixo é normal
+}
+    if (fase == Nfase) {
         mapas[fase][pxinicial[fase]][pyinicial[fase]] = '&';
     }
 }
 
-void ReiniciarFase()
-{
-    static int tentativas = 0;
-    tentativas++;
+void ReiniciarFase() {
+    tentativasFase++;
 
-    if (tentativas < 3)
-    {
+    if (tentativasFase < 3) {
         px = pxinicial[Nfase];
         py = pyinicial[Nfase];
         IniFase(Nfase);
-        printf("\033[1;31mFase reiniciada! Tentativas restantes: %d\033[0m", 3 - tentativas);
+        system("cls || clear");
+        RenderizarMapa();
+        gotoxy(dimensoesfases[Nfase][0] + 2, 0);
+        printf("\033[1;31mFase reiniciada! Tentativas restantes: %d\033[0m", 3 - tentativasFase);
         Sleep(1000);
+        system("cls || clear");
+        RenderizarMapa();
     }
-    else
-    {
-        jogar = 0;
-        px = pxinicial[Nfase];
-        py = pyinicial[Nfase];
-
-        system("cls || clear");
-
-        printf("\033[1;31mVoce falhou muitas vezes! Voltando ao menu principal...\033[0m");
-        Sleep(1000);
-
-        system("cls || clear");
-        desenharmenu();
-        menu();
+    else {
+        MostrarDerrota();
+        tentativasFase = 0;
     }
 }
 
-void VerificarEspinhos()
-{
-    if (Nfase < 2)
-    {
-        return;
-    }
+int PodeMoverPara(int x, int y) {
+    char celula = mapas[Nfase][x][y];
+    return (celula == '.' || celula == '=' || celula == '>');
+}
 
-    if (mapas[Nfase][px][py] == '#')
-    {
+void VerificarEspinhos() {
+    if (mapas[Nfase][px][py] == '#') {
         ReiniciarFase();
     }
 }
 
-void Monstros()
-{
-    if (Nfase < 1)
-    {
-        return;
-    }
+void Monstros() {
+    if (Nfase < 1) return;
 
     int linhas = dimensoesfases[Nfase][0];
     int colunas = dimensoesfases[Nfase][1];
 
-    int i = 0;
-    while (i < linhas)
-    {
-        int j = 0;
-        while (j < colunas)
-        {
-            if (mapas[Nfase][i][j] == 'X') // Mostro LVL 1
-            {
-                int direcao = rand() % 4;
-                int ni = i, nj = j;
+    // Primeiro passada: marca posições atuais dos monstros
+    int monstrosX[100], monstrosY[100], tipos[100];
+    int numMonstros = 0;
 
-                switch (direcao)
-                {
-                case 0:
-                    ni--; // Cima
-                    break;
-                case 1:
-                    ni++; // Baixo
-                    break;
-                case 2:
-                    nj--; // Esquerda
-                    break;
-                case 3:
-                    nj++; // Direita
-                    break;
-                }
-                if (ni >= 0 && ni < linhas && nj >= 0 && nj < colunas &&
-                    chaos[Nfase][ni][nj] == '.')
-                {
+    for (int i = 0; i < linhas; i++) {
+        for (int j = 0; j < colunas; j++) {
+            if (mapas[Nfase][i][j] == 'X' || mapas[Nfase][i][j] == 'V') {
+                monstrosX[numMonstros] = i;
+                monstrosY[numMonstros] = j;
+                tipos[numMonstros] = mapas[Nfase][i][j];
+                numMonstros++;
+            }
+        }
+    }
+
+    // Segunda passada: move os monstros
+    for (int m = 0; m < numMonstros; m++) {
+        int i = monstrosX[m];
+        int j = monstrosY[m];
+        char tipo = tipos[m];
+
+        if (tipo == 'X') { // Monstro nível 1 (movimento aleatório)
+            int direcao = rand() % 4;
+            int ni = i, nj = j;
+
+            switch (direcao) {
+                case 0: ni--; break; // Cima
+                case 1: ni++; break; // Baixo
+                case 2: nj--; break; // Esquerda
+                case 3: nj++; break; // Direita
+            }
+
+            // Verifica se pode mover para a nova posição
+            if (ni >= 0 && ni < linhas && nj >= 0 && nj < colunas) {
+                char destino = mapas[Nfase][ni][nj];
+                if (destino == '.' || destino == '&') {
                     mapas[Nfase][i][j] = chaos[Nfase][i][j];
                     mapas[Nfase][ni][nj] = 'X';
-                    if (ni == px && nj == py)
-                    {
+                    
+                    if (ni == px && nj == py) {
                         ReiniciarFase();
+                        return;
                     }
-                    break;
                 }
             }
-            else if (mapas[Nfase][i][j] == 'V') // MONSTRO LVL 2
-            {
-                int di = (px > i) ? 1 : (px < i) ? -1
-                                                 : 0;
-                int dj = (py > j) ? 1 : (py < j) ? -1
-                                                 : 0;
+        }
+        else if (tipo == 'V') { // Monstro nível 2 (persegue o jogador)
+            int di = (px > i) ? 1 : (px < i) ? -1 : 0;
+            int dj = (py > j) ? 1 : (py < j) ? -1 : 0;
 
-                int ni = i + di;
-                int nj = j + dj;
-
-                if (ni >= 0 && ni < linhas && nj >= 0 && nj < colunas &&
-                    chaos[Nfase][ni][nj] == '.')
-                {
+            // Tenta mover na direção X primeiro
+            int ni = i + di;
+            int nj = j;
+            
+            if (ni >= 0 && ni < linhas && nj >= 0 && nj < colunas) {
+                char destino = mapas[Nfase][ni][nj];
+                if (destino == '.' || destino == '&') {
                     mapas[Nfase][i][j] = chaos[Nfase][i][j];
                     mapas[Nfase][ni][nj] = 'V';
-
-                    if (ni == px && nj == py)
-                    {
+                    
+                    if (ni == px && nj == py) {
                         ReiniciarFase();
+                        return;
+                    }
+                    continue; // Movimento concluído
+                }
+            }
+
+            // Se não conseguiu mover em X, tenta mover em Y
+            ni = i;
+            nj = j + dj;
+            
+            if (ni >= 0 && ni < linhas && nj >= 0 && nj < colunas) {
+                char destino = mapas[Nfase][ni][nj];
+                if (destino == '.' || destino == '&') {
+                    mapas[Nfase][i][j] = chaos[Nfase][i][j];
+                    mapas[Nfase][ni][nj] = 'V';
+                    
+                    if (ni == px && nj == py) {
+                        ReiniciarFase();
+                        return;
                     }
                 }
             }
-            j++;
         }
-        i++;
     }
 }
 
-void RenderizarMapa()
-{
+void MostrarLegendas() {
+    if (Nfase == 0) { // Mostra legendas apenas na vila
+        gotoxy(1, dimensoesfases[Nfase][1] * 2 + 5);
+        printf("\033[1mLegenda:\033[0m");
+        gotoxy(2, dimensoesfases[Nfase][1] * 2 + 5);
+        printf("\033[1;33m&\033[0m - Jogador");
+        gotoxy(3, dimensoesfases[Nfase][1] * 2 + 5);
+        printf("\033[1;36mP\033[0m - NPC");
+        gotoxy(4, dimensoesfases[Nfase][1] * 2 + 5);
+        printf("\033[1;32m@\033[0m - Chave");
+        gotoxy(5, dimensoesfases[Nfase][1] * 2 + 5);
+        printf("\033[1;34mD\033[0m - Porta");
+        gotoxy(6, dimensoesfases[Nfase][1] * 2 + 5);
+        printf("\033[1;34m=\033[0m - Porta Aberta");
+        gotoxy(7, dimensoesfases[Nfase][1] * 2 + 5);
+        printf("\033[1;33mO\033[0m - Botao");
+        gotoxy(8, dimensoesfases[Nfase][1] * 2 + 5);
+        printf("\033[1;31m#\033[0m - Espinhos");
+        gotoxy(9, dimensoesfases[Nfase][1] * 2 + 5);
+        printf("* - Parede");
+        gotoxy(10, dimensoesfases[Nfase][1] * 2 + 5);
+        printf("\033[1;37m>\033[0m - Teletransporte");
+        gotoxy(11, dimensoesfases[Nfase][1] * 2 + 5);
+        printf("\033[1;31mX\033[0m - Monstro Nivel 1");
+        gotoxy(12, dimensoesfases[Nfase][1] * 2 + 5);
+        printf("\033[1;31mV\033[0m - Monstro Nivel 2");
+    }
+}
+
+void RenderizarMapa() {
     int linhas = dimensoesfases[Nfase][0];
     int colunas = dimensoesfases[Nfase][1];
 
     COORD pos = {0, 0};
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
 
-    int i = 0, j = 0;
-    while (i < linhas)
-    {
-        j = 0;
-        while (j < colunas)
-        {
-            printf("%c ", mapas[Nfase][i][j]);
-            j++;
+    for (int i = 0; i < linhas; i++) {
+        for (int j = 0; j < colunas; j++) {
+            char c = mapas[Nfase][i][j];
+            
+            // Aplica cores diferentes para cada elemento
+            if (c == '&') printf("\033[1;33m%c \033[0m", c); // Jogador - amarelo
+            else if (c == 'P') printf("\033[1;36m%c \033[0m", c); // NPC - ciano
+            else if (c == '@') printf("\033[1;32m%c \033[0m", c); // Chave - verde
+            else if (c == 'D' || c == '=') printf("\033[1;34m%c \033[0m", c); // Porta - azul
+            else if (c == 'O') printf("\033[1;33m%c \033[0m", c); // Botão - amarelo (alterado de magenta para amarelo)
+            else if (c == '#') printf("\033[1;31m%c \033[0m", c); // Espinho - vermelho
+            else if (c == '>') printf("\033[1;37m%c \033[0m", c); // Teletransporte - branco
+            else if (c == 'X' || c == 'V') printf("\033[1;31m%c \033[0m", c); // Monstros - vermelho
+            else printf("%c ", c); // Demais elementos - cor padrão
         }
         printf("\n");
-        i++;
     }
+
+    // Mostra informações adicionais abaixo do mapa
+    printf("\nFase: %d | Tentativas restantes: %d\n", Nfase + 1, 3 - tentativasFase);
+    printf("Use WASD para mover, E para interagir\n");
+    
+    // Mostra legendas apenas na vila
+    MostrarLegendas();
 }
 
-void TrocarFase(int novafase)
-{
-    mapas[Nfase][px][py] = chaos[Nfase][px][py]; // Limpa Jogador Na Fase Atual
-
-    // Att Fase
+void TrocarFase(int novafase) {
+    mapas[Nfase][px][py] = chaos[Nfase][px][py]; // Limpa jogador na fase atual
     Nfase = novafase;
     px = pxinicial[Nfase];
     py = pyinicial[Nfase];
-
-    // Coloca Jogador Na Nova Fase
+    tentativasFase = 0; // Reseta tentativas ao mudar de fase
+    
+    // Coloca jogador na nova fase
     mapas[Nfase][px][py] = '&';
 
     system("cls");
     Sleep(500);
     printf("Descendo Para o Andar %d...Cada Vez Mais Perto Do Inferno!", Nfase + 1);
+    Sleep(1000);
     system("cls || clear");
-
     RenderizarMapa();
 }
 
-void VerificarTeletransporte() {
-    if (Nfase != 3) return; // Só tem teletransporte na fase 3
-    
-    if (mapas[Nfase][px][py] == '>') 
-    {
-        int linhas = dimensoesfases[Nfase][0];
-        int colunas = dimensoesfases[Nfase][1];
-        
-        // Encontra o outro teletransporte
-        for (int i = 0; i < linhas; i++) 
-        {
-            for (int j = 0; j < colunas; j++) 
-            {
-                if (mapas[Nfase][i][j] == '>' && (i != px || j != py)) 
-                {
-                    mapas[Nfase][px][py] = chaos[Nfase][px][py];
-                    px = i;
-                    py = j;
-                    mapas[Nfase][px][py] = '&';
-                    printf("\033[1;35mTeletransportado!\033[0m");
-                    Sleep(500);
-                    return;
-                }
-            }
-        }
-    }
-}
-
-void MostrarVitoria()
-{
+void MostrarVitoria() {
     system("cls || clear");
     printf("\033[1;32m");
     printf("\n\n\n\n\n\n\n");
@@ -376,297 +426,354 @@ void MostrarVitoria()
     printf("\033[0m");
     Sleep(3000);
     Nfase = 0;
+    tentativasFase = 0;
     system("cls || clear");
     desenharmenu();
 }
 
-void entradamenu(void)
-{
+void InteragirComObjetos() {
+    // Verifica todas as células ao redor 
+    for (int i = px - 1; i <= px + 1; i++) {
+        for (int j = py - 1; j <= py + 1; j++) {
+            // Verifica se está dentro dos limites do mapa
+            if (i >= 0 && i < dimensoesfases[Nfase][0] && 
+                j >= 0 && j < dimensoesfases[Nfase][1]) {
+                
+                char obj = mapas[Nfase][i][j];
+                
+                if (obj == 'P') { 
+                    dialogo = 1;
+                    system("cls || clear");
+                    // Mantém o jogador visível durante o diálogo
+                    mapas[Nfase][px][py] = '&';
+                    RenderizarMapa();
+                    
+                    if (Nfase == 0) {
+                        if (i == 1 && j == 2) { // Primeiro NPC
+                            printf("\n\n\n\n\n\033[1mAnciao: Esse eh o grande abismo de Hell Valley,a cratera mais preciosa do mundo, dizem que a seculos ou milenios atras,"
+                                   " caiu um grande meteoro carregado de magia bem nesse lugar,no entanto...ninguem conquistou as riquezas do inferno,dizem que o Diabo eh ganancioso...\033[0m");
+                        } else if (i == 12 && j == 5) { // Segundo NPC (Líder)
+                            printf("\n\n\n\n\n\033[1mLider: Bem vindo novato, vou te explicar sobre como funcionam as expedicoes. Se prepare com seus melhores equipamentos e quando estiver pronto desca pelo elevador, e parta direto pelo fundo da masmorra, nos definimos os setores por regioes a primeira area eh tranquila mas ja foi saqueada por completo, do segundo setor para baixo comecam a aparecer os monstros nos ainda nao descobrimos sua origem porem construimos algumas armadilhas para lidar com eles, so ficar atento e tomar cuidado por onde olha, ate o momento o maximo que conseguimos descer foi por 3 regioes a partir dai as coisas comecam a ficar perigosas demais, o ar comeca a falhar e a pressao fica prestes a destruir nossos corpos."
+                                   " Se voce quiser continuar descendo saiba que vai ser por conta propria\033[0m");
+                        }
+                    }
+                    else if (Nfase == 1) {
+                        printf("\nNPC: Cuidado com os espinhos (#)! Eles reiniciam a fase.\n");
+                    }
+                    else if (Nfase == 2) {
+                        printf("\nNPC: Os botoes (O) podem revelar caminhos secretos!\n");
+                    }
+                    else if (Nfase == 3) {
+                        printf("\nNPC: Use os teletransportes (>) com cuidado!\n");
+                    }
+
+                    printf("\n\nPressione E para continuar...");
+                    
+                    while (dialogo == 1) {
+                        input = getch();
+                        if (input == 'e' || input == 'E' || input == 27) {
+                            dialogo = 0;
+                            system("cls || clear");
+                            RenderizarMapa();
+                        }
+                    }
+                    return; // Sai da função após interação para evitar múltiplos diálogos
+                }
+                else if (obj == '@') { // Chave
+                    mapas[Nfase][i][j] = '.';
+                    chaos[Nfase][i][j] = '.';
+                    gotoxy(dimensoesfases[Nfase][0] + 3, 0);
+                    printf("\033[1;32mChave coletada! A porta agora esta aberta.\033[0m");
+                    Sleep(500);
+                    
+                    // Abre todas as portas 'D' na fase
+                    for (int x = 0; x < dimensoesfases[Nfase][0]; x++) {
+                        for (int y = 0; y < dimensoesfases[Nfase][1]; y++) {
+                            if (mapas[Nfase][x][y] == 'D') {
+                                mapas[Nfase][x][y] = '=';
+                                chaos[Nfase][x][y] = '=';
+                            }
+                        }
+                    }
+                }
+                else if (obj == 'O') { // Botão
+                    gotoxy(dimensoesfases[Nfase][0] + 3, 0);
+                    printf("\033[1;33mBotao ativado! Uma passagem secreta foi revelada.\033[0m");
+                    Sleep(500);
+                    
+                    if (Nfase == 2) {
+                        // Remove algumas paredes na fase 2
+                        mapas[2][5][5] = ' ';
+                        mapas[2][5][6] = ' ';
+                        chaos[2][5][5] = ' ';
+                        chaos[2][5][6] = ' ';
+                    } 
+                    else if (Nfase == 3) {
+                        // Remove algumas paredes na fase 3
+                        mapas[3][25][25] = ' ';
+                        mapas[3][25][26] = ' ';
+                        chaos[3][25][25] = ' ';
+                        chaos[3][25][26] = ' ';
+                         }
+                    }
+                               
+                }
+            }
+        }
+    }
+
+   void VerificarTeletransporte() {
+    // Verifica se o jogador está em cima de um teletransporte
+    if (mapas[Nfase][px][py] == '>') {
+        int linhas = dimensoesfases[Nfase][0];
+        int colunas = dimensoesfases[Nfase][1];
+        
+        // Encontra o outro teletransporte
+        for (int x = 0; x < linhas; x++) {
+            for (int y = 0; y < colunas; y++) {
+                if (mapas[Nfase][x][y] == '>' && (x != px || y != py)) {
+                    // Salva o que estava no chão da posição atual
+                    char chaoAtual = chaos[Nfase][px][py];
+                    
+                    // Remove o jogador da posição atual
+                    mapas[Nfase][px][py] = chaoAtual;
+                    
+                    // Salva o que está no chão da nova posição
+                    char chaoNovo = chaos[Nfase][x][y];
+                    
+                    // Move o jogador para o outro teletransporte
+                    px = x;
+                    py = y;
+                    mapas[Nfase][px][py] = '&';
+                    chaos[Nfase][px][py] = chaoNovo;
+                    
+                    // Atualiza o display
+                    gotoxy(dimensoesfases[Nfase][0] + 3, 0);
+                    printf("\033[1;35mTeletransportado!\033[0m");
+                    Sleep(500);
+                    system("cls || clear");
+                    RenderizarMapa();
+                    return;
+                }
+            }
+        }
+    }
+}
+
+void entradamenu(void) {
     jogar = 1;
     int inicio = 0;
+    
 ini:
-    if (inicio == 1)
-    {
+    if (inicio == 1) {
         desenharmenu();
         menu();
     }
 
     int input = getch();
 
-    if (input == 0 || input == key_down || input == key_up)
-    {
-        switch (input)
-        {
-        case key_up:
-            if (selecionar > 0)
-                selecionar--;
-            else
-                selecionar = 2;
-            break;
-        case key_down:
-            if (selecionar < 2)
-                selecionar++;
-            else
-                selecionar = 0;
-            break;
+    if (input == 0 || input == key_down || input == key_up) {
+        switch (input) {
+            case key_up:
+                if (selecionar > 0) selecionar--;
+                else selecionar = 2;
+                break;
+            case key_down:
+                if (selecionar < 2) selecionar++;
+                else selecionar = 0;
+                break;
         }
     }
-    else if (input == enter)
-    {
+    else if (input == enter) {
         system("cls");
-        switch (selecionar)
-        {
-        case 0:
-            printf("Iniciando Jogo...\n");
-            Sleep(1000);
+        switch (selecionar) {
+            case 0: // Jogar
+                printf("Iniciando Jogo...\n");
+                Sleep(1000);
 
-            int fase = 0;
-            while (fase < TFases)
-            {
-                IniFase(fase);
-                fase++;
-            }
-
-            // Coloca o Jogador Na Fase Inicial
-            Nfase = 0;
-            px = pxinicial[Nfase];
-            py = pyinicial[Nfase];
-            mapas[Nfase][px][py] = '&';
-
-            while (jogar == 1)
-            {
-                COORD pos = {0, 0};
-                SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
-                RenderizarMapa();
-
-                if (tutorial == 1)
-                {
-                    dialogo = 1;
-                    printf("Anciao: Ola Aventureiro, Vamos Para Um Breve Tutorial, Use 'WASD' Para Andar, Use 'E' Para Interagir Com 'P'(NPC), '@'(Chave), 'O'(Botao)\n");
-                    printf("\033[3;35HLegenda Dos Caracteres:\033[4;35H'P' = NPC\033[5;35H'@' = Chave\033[6;35H'O' = Botao"
-                           "\033[7;35H'D' = Porta\033[8;35H'=' = Porta Aberta\033[9;35H'#' = Espinhos\033[10;35H'*' = Parede\033[11;35H'>' = Teletransporte"
-                           "\033[12;35H'X' = Monstro Nivel 1\033[13;35H'V' = Monstro Nivel 2");
-
-                    while (dialogo == 1)
-                    {
-                        input = getch();
-                        if (input == 101 || input == 27 || input == 69)
-                        {
-                            dialogo = 0;
-                            printf("\033[16;1H\033[K");
-                            tutorial = 0;
-                        }
-                    }
+                // Inicializa todas as fases
+                for (int fase = 0; fase < TFases; fase++) {
+                    IniFase(fase);
                 }
 
-                input = getch();
-
-                // Limpa Posição
-                mapas[Nfase][px][py] = chaos[Nfase][px][py];
-
-                if (input == 39)
-                {
-                    inicio = 1;
-                    goto ini;
-                }
-
-                // Verifica se está na porta aberta para trocar de mapa
-                if (mapas[Nfase][px][py] == '=')
-                {
-                    if (Nfase < TFases - 1)
-                    {
-                        TrocarFase(Nfase + 1);
-                    }
-                    else if (Nfase == 3)
-                    {
-                        MostrarVitoria();
-                        break;
-                    }
-                }
-
-                VerificarEspinhos();
-                Monstros();
-                VerificarTeletransporte();
-
-                switch (input)
-                {
-                case 'd':
-                case 'D':
-                    if (py < dimensoesfases[Nfase][1] - 1)
-                    {
-                        char proximo = mapas[Nfase][px][py + 1];
-                        if (proximo != '*' && proximo != 'P' && proximo != 'D' && proximo != '@' && proximo != ' ' && proximo != 'X' && proximo != 'V')
-                        {
-                            py++;
-                        }
-                    }
-                    break;
-
-                case 'a':
-                case 'A':
-                    if (py > 0)
-                    {
-                        char proximo = mapas[Nfase][px][py - 1];
-                        if (proximo != '*' && proximo != 'P' && proximo != 'D' && proximo != '@' && proximo != ' ' && proximo != 'X' && proximo != 'V')
-                        {
-                            py--;
-                        }
-                    }
-                    break;
-
-                case 's':
-                case 'S':
-                    if (px < dimensoesfases[Nfase][0] - 1)
-                    {
-                        char proximo = mapas[Nfase][px + 1][py];
-                        if (proximo != '*' && proximo != 'P' && proximo != 'D' && proximo != '@' && proximo != ' ' && proximo != 'X' && proximo != 'V')
-                        {
-                            px++;
-                        }
-                    }
-                    break;
-
-                case 'w':
-                case 'W':
-                    if (px > 0)
-                    {
-                        char proximo = mapas[Nfase][px - 1][py];
-                        if (proximo != '*' && proximo != 'P' && proximo != 'D' && proximo != '@' && proximo != ' ' && proximo != 'X' && proximo != 'V')
-                        {
-                            px--;
-                        }
-                    }
-                    break;
-
-                case 'e':
-                case 'E':
-                    if (tutorial == 0)
-                    {
-                        int i = px - 1;
-                        while (i <= px + 1)
-                        {
-                            int j = py - 1;
-                            while (j <= py + 1)
-                            {
-                                // Verifica se está dentro dos limites do mapa
-                                if (i >= 0 && i < dimensoesfases[Nfase][0] &&
-                                    j >= 0 && j < dimensoesfases[Nfase][1])
-                                {
-
-                                    char obj = mapas[Nfase][i][j];
-                                    if (obj == 'P')
-                                    {
-                                        dialogo = 1;
-                                        if (Nfase == 0)
-                                        {
-                                            printf("\033[s");
-                                            printf("\n");
-                                            printf("\n\033[1mAnciao: Esse eh o grande abismo do inferno, dizem que a seculos ou milenios atras,"
-                                                   " caiu um grande meteoro carregado de magia bem nesse lugar, e fez essa \ncratera enorme,"
-                                                   " com o passar dos seculos, os aventureiros tentaram explorar o abismo para obter recursos,"
-                                                   " e perceberam que os recursos eram extremamente \nabundantes, diversos itens magicos e materiais "
-                                                   "de valor altissimo, e fazendo diversas obras de construcao, tijolo por tijolo ate formar uma grande"
-                                                   " masmorra \ncom centenas, ou ate milhares de andares, agora milenios depois nossa vila foi construida"
-                                                   " em volta dessa masmorra e nos nao conhecemos o responsavel pela \nconstrucao e muito menos o quao profunda"
-                                                   " ela pode ir, so sabemos que varios aventureiros descem e poucos dos que exploram os andares mais profundos"
-                                                   " \nconseguem retornar.\033[0m");
-                                        }
-
-                                        while (dialogo == 1)
-                                        {
-                                            input = getch();
-                                            if (input == 101 || input == 27 || input == 69)
-                                            {
-                                                printf("\033[u");
-                                                printf("\033[0J");
-                                                dialogo = 0;
-                                            }
-                                        }
-                                    }
-                                    else if (obj == '@')
-                                    {
-                                        mapas[Nfase][i][j] = '.';
-                                        printf("Voce coletou um item especial!");
-                                        Sleep(500);
-                                        printf("\033[16;1H\033[K");
-
-                                        // Na Vila, transforma a porta em '=' quando pega o item
-                                        if (Nfase == 0)
-                                        {
-                                            mapas[0][12][7] = '=';
-                                            chaos[0][12][7] = '=';
-                                        }
-
-                                        else if (Nfase == 1)
-                                        {
-                                            mapas[1][12][7] = '=';
-                                            chaos[1][12][7] = '=';
-                                        }
-                                        else if (Nfase == 2)
-                                        {
-                                            mapas[2][12][7] = '=';
-                                            chaos[2][12][7] = '=';
-                                        }
-                                    }
-                                    else if (obj == 'O') // Botão
-                                    {  
-                                        printf("\033[1;33mBotao ativado! Uma passagem secreta se abre...\033[0m");
-                                        Sleep(500);
-                                        printf("\033[16;1H\033[K");
-                                        mapas[2][8][10] = 'O';
-                                        chaos[2][8][10] = 'O';
-                                    
-                                        // Exemplo: transforma algumas paredes em chão
-                                        if (Nfase == 2) 
-                                        {
-                                            mapas[2][8][10] = 'O';
-                                            chaos[2][8][10] = 'O';
-                                        } 
-                                        else if (Nfase == 3) 
-                                        {
-                                            mapas[3][25][25] = '.';
-                                            chaos[3][25][25] = '.';
-                                        }
-                                    }
-                                }
-                                j++;
-                            }
-                            i++;
-                        }
-                    }
-                    break;
-                }
-
-                // Atualiza a posição do jogador
+                // Coloca o jogador na fase inicial
+                Nfase = 0;
+                px = pxinicial[Nfase];
+                py = pyinicial[Nfase];
                 mapas[Nfase][px][py] = '&';
-            }
-            break;
+                tentativasFase = 0;
 
-        case 1:
-            printf("\tDesenvolvido por:\n");
-            printf("Programacao Por: Icaro Sousa, Daniel Silva, Rafael Rian\n");
-            printf("Design Do Jogo Por:Daniel Silva\n");
-            printf("Historia Do Jogo Por: Icaro Sousa\n");
-            printf("\n\tAgradecimentos Especiais:\n");
-            printf("A todos que apoiaram e jogaram Dungeons of Infernus!");
-            break;
+                while (jogar == 1) {
+                    RenderizarMapa();
 
-        case 2:
-            printf("\033[1;31mOs portais de Dungeons of Infernus sempre estarao abertos para voce. Volte quando quiser, mas cuidado... o fogo do inferno nunca se apaga.\033[0m\n");
-            exit(0);
+                    if (tutorial == 1) {
+                        dialogo = 1;
+                        system("cls || clear");
+                        printf("\n\n\n\n\n\n\n");
+                        printf("%*s\n", 50, "TUTORIAL");
+                        printf("\nAnciao: Ola Aventureiro, Vamos Para Um Breve Tutorial, Use 'WASD' Para Andar, Use 'E' Para Interagir");
+                        printf("\n\nLegenda Dos Caracteres:");
+                        printf("\n'P' = NPC");
+                        printf("\n'@' = Chave");
+                        printf("\n'O' = Botao");
+                        printf("\n'D' = Porta");
+                        printf("\n'=' = Porta Aberta");
+                        printf("\n'#' = Espinhos");
+                        printf("\n'*' = Parede");
+                        printf("\n'>' = Teletransporte");
+                        printf("\n'X' = Monstro Nivel 1");
+                        printf("\n'V' = Monstro Nivel 2");
+                        printf("\n\nPressione E para comecar...");
+
+                        while (dialogo == 1) {
+                            input = getch();
+                            if (input == 'e' || input == 'E' || input == 27) {
+                                dialogo = 0;
+                                tutorial = 0;
+                                system("cls || clear");
+                                RenderizarMapa();
+                            }
+                        }
+                    }
+
+                    input = getch();
+
+                    // Limpa posição atual do jogador
+                    mapas[Nfase][px][py] = chaos[Nfase][px][py];
+
+                    if (input == 39) { // Tecla ' para voltar ao menu
+                        inicio = 1;
+                        goto ini;
+                    }
+
+                    // Verifica se está na porta aberta para trocar de fase
+                    if (mapas[Nfase][px][py] == '=') {
+                        if (Nfase < TFases - 1) {
+                            TrocarFase(Nfase + 1);
+                            continue;
+                        }
+                        else if (Nfase == 3) {
+                            MostrarVitoria();
+                            break;
+                        }
+                    }
+
+                    // Verifica espinhos e monstros
+                    VerificarEspinhos();
+                    Monstros();
+
+                    // Processa movimento ou interação
+                    switch (input) {
+                        case 'd':
+                        case 'D': // Direita
+                            if (py < dimensoesfases[Nfase][1] - 1) {
+                                char destino = mapas[Nfase][px][py + 1];
+                                if (PodeMoverPara(px, py + 1)) {
+                                    py++;
+                                }
+                                else if (destino == '#') {
+                                    ReiniciarFase();
+                                }
+                            }
+                             VerificarTeletransporte();
+                            break;
+                            VerificarTeletransporte();
+
+                            // Atualiza posição do jogador
+                            mapas[Nfase][px][py] = '&';
+
+                        case 'a':
+                        case 'A': // Esquerda
+                            if (py > 0) {
+                                char destino = mapas[Nfase][px][py - 1];
+                                if (PodeMoverPara(px, py - 1)) {
+                                    py--;
+                                }
+                                else if (destino == '#') {
+                                    ReiniciarFase();
+                                }
+                            }
+                             VerificarTeletransporte();
+                            break;
+                            VerificarTeletransporte();
+
+                            // Atualiza posição do jogador
+                            mapas[Nfase][px][py] = '&';
+
+                        case 's':
+                        case 'S': // Baixo
+                            if (px < dimensoesfases[Nfase][0] - 1) {
+                                char destino = mapas[Nfase][px + 1][py];
+                                if (PodeMoverPara(px + 1, py)) {
+                                    px++;
+                                }
+                                else if (destino == '#') {
+                                    ReiniciarFase();
+                                }
+                            }
+                             VerificarTeletransporte();
+                            break;
+                            VerificarTeletransporte();
+
+                            // Atualiza posição do jogador
+                            mapas[Nfase][px][py] = '&';
+
+                        case 'w':
+                        case 'W': // Cima
+                            if (px > 0) {
+                                char destino = mapas[Nfase][px - 1][py];
+                                if (PodeMoverPara(px - 1, py)) {
+                                    px--;
+                                }
+                                else if (destino == '#') {
+                                    ReiniciarFase();
+                                }
+                            }
+                             VerificarTeletransporte();
+                            break;
+                            VerificarTeletransporte();
+
+                            // Atualiza posição do jogador
+                            mapas[Nfase][px][py] = '&';
+
+                        case 'e':
+                        case 'E': // Interagir
+                            if (tutorial == 0) {
+                                InteragirComObjetos();
+                            }
+                            break;
+                    }
+
+                    // Atualiza posição do jogador
+                    mapas[Nfase][px][py] = '&';
+                    VerificarTeletransporte();
+                }
+                break;
+
+            case 1: // Créditos
+                printf("\tDesenvolvido por:\n");
+                printf("Programacao Por: Icaro Sousa, Daniel Silva, Rafael Albuquerque\n");
+                printf("Design Do Jogo Por: Daniel Silva e Rafael Albuquerque\n");
+                printf("Historia Do Jogo Por: Icaro Sousa\n");
+                printf("\n\tAgradecimentos Especiais:\n");
+                printf("A todos que apoiaram e jogaram Dungeons of Infernus!");
+                break;
+
+            case 2: // Sair
+                printf("\033[1;31mOs portais de Dungeons of Infernus sempre estarao abertos para voce. Volte quando quiser, mas cuidado... o fogo do inferno nunca se apaga.\033[0m\n");
+                exit(0);
         }
         getch();
         desenharmenu();
     }
 }
 
-int main(void)
-{
-    printf("\033[?25l");
+int main(void) {
+    srand(time(NULL)); // Inicializa semente para números aleatórios
+    printf("\033[?25l"); // Esconde cursor
     desenharmenu();
 
-    while (1)
-    {
+    while (1) {
         menu();
         entradamenu();
     }
