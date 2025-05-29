@@ -31,11 +31,6 @@
 
 ## 🕹️ Como Jogar  
 
-### ⚙️ Instalação  
-```bash
-gcc dungeon.c -o dungeon && ./dungeon
-```
-
 ### 🎯 Controles  
 | Tecla | Ação |  
 |-------|------|  
