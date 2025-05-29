@@ -343,8 +343,8 @@ void IniFase(int fase)
         mapas[fase][12][4] = 'X';
         mapas[fase][14][9] = 'X';
         mapas[fase][13][3] = 'X';
-        mapas[fase][10][9] = '>'; // Teletransporte 1
-        chaos[fase][10][9] = '>'; // Chão abaixo é normal
+        mapas[fase][10][9] = '>'; // Teletransporte 
+        chaos[fase][10][9] = '>';  // Teletransporte
 
         mapas[fase][28][38] = '*';
         mapas[fase][28][37] = '*';
@@ -392,8 +392,6 @@ void IniFase(int fase)
         mapas[fase][38][19] = '#';
         mapas[fase][37][19] = '#';
         mapas[fase][36][19] = '#';
-        mapas[fase][35][23] = '#';
-        mapas[fase][34][23] = '#';
         mapas[fase][36][21] = '#';
         mapas[fase][35][21] = '#';
         mapas[fase][34][21] = '#';
@@ -417,7 +415,6 @@ void IniFase(int fase)
         mapas[fase][33][10] = '#';
         mapas[fase][33][9] = '#';
         mapas[fase][37][11] = '#';
-        mapas[fase][38][11] = '#';
         mapas[fase][36][11] = '#';
         mapas[fase][35][11] = '#';
         mapas[fase][35][10] = '#';
@@ -453,8 +450,90 @@ void IniFase(int fase)
         mapas[fase][23][10] = '#';
         mapas[fase][23][11] = '#';
         mapas[fase][23][12] = '#';
-        mapas[fase][24][12] = '#';
+        mapas[fase][22][12] = '#';
+        mapas[fase][21][12] = '#';
+        mapas[fase][20][12] = '#';
+        mapas[fase][20][11] = '#';
+        mapas[fase][20][10] = '#';
+        mapas[fase][20][9] = '#';
+        mapas[fase][20][8] = '#';
+        mapas[fase][20][7] = '#';
+        mapas[fase][20][6] = '#';
+        mapas[fase][33][8] = '#';
+        mapas[fase][32][8] = '#';
+        mapas[fase][31][8] = '#';
+        mapas[fase][30][8] = '#';
+        mapas[fase][29][8] = '#';
+        mapas[fase][29][7] = '#';
+        mapas[fase][29][6] = '#';
+        mapas[fase][29][5] = '#';
+        mapas[fase][28][5] = '#';
+        mapas[fase][27][5] = '#';
+        mapas[fase][26][5] = '#';
+        mapas[fase][25][5] = '#';
+        chaos[fase][36][8] = '#';
+        chaos[fase][37][8] = '#';
+        chaos[fase][38][8] = '#';
+        mapas[fase][25][6] = '#';
+        chaos[fase][38][11] = '#';
+        mapas[fase][25][7] = '#';
+        mapas[fase][25][8] = '#';
+        mapas[fase][25][9] = '#';
+        mapas[fase][25][10] = '#';
+        mapas[fase][25][11] = '#';
         mapas[fase][25][12] = '#';
+        mapas[fase][25][13] = '#';
+        mapas[fase][25][14] = '#';
+        mapas[fase][24][14] = '#';
+        mapas[fase][23][14] = '#';
+        mapas[fase][22][14] = '#';
+        mapas[fase][21][14] = '#';
+        mapas[fase][20][14] = '#';
+        mapas[fase][19][14] = '#';
+        mapas[fase][18][14] = '#';
+        mapas[fase][18][13] = '#';
+        mapas[fase][18][12] = '#';
+        mapas[fase][18][11] = '#';
+        mapas[fase][18][10] = '#';
+        mapas[fase][18][9] = '#';
+        mapas[fase][18][8] = '#';
+        mapas[fase][18][7] = '#';
+        mapas[fase][18][6] = '#';
+        mapas[fase][20][5] = '#';
+        mapas[fase][20][4] = '#';
+        mapas[fase][19][4] = '#';
+        mapas[fase][18][4] = '#';
+        mapas[fase][17][4] = '#';
+        mapas[fase][36][6] = '#';
+        mapas[fase][37][6] = '#';
+        mapas[fase][38][6] = '#';
+        mapas[fase][16][4] = '#';
+        mapas[fase][16][5] = '#';
+        mapas[fase][16][6] = '#';
+        mapas[fase][16][7] = '#';
+        mapas[fase][16][8] = '#';
+        mapas[fase][16][9] = '#';
+        mapas[fase][16][10] = '#';
+        mapas[fase][16][11] = '#';
+        mapas[fase][16][12] = '#';
+        mapas[fase][15][12] = '#';
+        mapas[fase][14][12] = '#';
+        mapas[fase][13][12] = '#';
+        mapas[fase][12][12] = '#';
+        mapas[fase][12][11] = '#';
+        mapas[fase][12][14] = '#';
+        mapas[fase][13][14] = '#';
+        mapas[fase][14][14] = '#';
+        mapas[fase][15][14] = '#';
+        mapas[fase][16][14] = '#';
+        mapas[fase][17][14] = '#';
+        mapas[fase][10][11] = '#';
+        mapas[fase][10][12] = '#';
+        mapas[fase][10][13] = '#';
+        mapas[fase][10][14] = '#';
+        mapas[fase][11][14] = '#';
+        
+        
 
     }
     if (fase == Nfase)
@@ -875,13 +954,14 @@ void InteragirComObjetos()
                     }
                     else if(Nfase == 3)
                     {
-                        printf("\033[44;H");
+                       printf("\033[44;H");
                         printf("\033[s");
                         printf("\033[K");
                         mapas[3][12][10] = '.';
                         mapas[3][38][24] = '.';
                         chaos[3][38][24] = '.';
                         chaos[3][38][24] = '*';
+                       
                     }
                 }
             }
